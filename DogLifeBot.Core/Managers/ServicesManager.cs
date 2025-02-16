@@ -1,0 +1,80 @@
+using DogLiveBot.BL.ServiceInterface;
+using DogLiveBot.BL.Services;
+using DogLiveBot.Core.Options;
+using DogLiveBot.Data.Context;
+using DogLiveBot.Data.Repository.RepositoryImplementations;
+using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Telegram.Bot;
+
+namespace DogLiveBot.Core.Managers;
+
+public static class ServicesManager
+{
+    /// <summary>
+    /// Конфигурирует сервисы для приложения.
+    /// </summary>
+    /// <param name="builder">Строитель хоста, используемый для конфигурации сервисов.</param>
+    public static void ConfigureServices(IHostBuilder builder)
+    {
+        builder.ConfigureServices((context, services) =>
+        {
+            RegisterOptions(services, context);
+            RegisterDbContext(services);
+            RegisterTelegramBotClient(services);
+            RegisterServices(services);
+        });
+    }
+
+    /// <summary>
+    /// Регистрирует параметры приложения в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    /// <param name="context">Контекст хоста, содержащий конфигурацию приложения.</param>
+    private static void RegisterOptions(IServiceCollection services, HostBuilderContext context)
+    {
+        services.AddOptions<ApplicationOptions>()
+            .Bind(context.Configuration.GetSection(nameof(ApplicationOptions)))
+            .ValidateDataAnnotations();
+    }
+
+    /// <summary>
+    /// Регистрирует контекст базы данных и репозитории в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterDbContext(IServiceCollection services)
+    {
+        services.AddDbContextFactory<ApplicationDbContext>((provider, contextOptionsBuilder) =>
+        {
+            var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
+            contextOptionsBuilder.UseSqlite(options.ApplicationDbConnection.ConnectionString);
+        });
+        services.AddScoped(typeof(IRepository<>), typeof(ApplicationRepository<>));
+    }
+
+    /// <summary>
+    /// Регистрирует клиент Telegram Bot и сервис Telegram Bot в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterTelegramBotClient(IServiceCollection services)
+    {
+        services.AddSingleton<ITelegramBotClient>(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
+            return new TelegramBotClient(options.TelegramBotSettings.Token);
+        });
+        services.AddTransient<ITelegramBotService, TelegramBotService>();
+    }
+
+    /// <summary>
+    /// Регистрирует дополнительные сервисы в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterServices(IServiceCollection services)
+    {
+        // add service
+    }
+}

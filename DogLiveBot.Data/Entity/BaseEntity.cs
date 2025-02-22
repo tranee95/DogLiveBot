@@ -20,7 +20,7 @@ public class BaseEntity<T>
     /// <summary>
     /// Время последнего изменения сущности.
     /// </summary>
-    public DateTime ModifiedDate { get; set; }
+    public DateTime? ModifiedDate { get; set; }
 
     /// <summary>
     /// Время удаления сущности (если применимо).

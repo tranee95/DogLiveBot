@@ -1,4 +1,5 @@
-using DogLiveBot.BL.ServiceInterface;
+using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
+using DogLiveBot.BL.Services.ServiceInterface;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -6,20 +7,25 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace DogLiveBot.BL.Services
+namespace DogLiveBot.BL.Services.ServiceImplementation
 {
     public class TelegramBotService : ITelegramBotService
     {
         private readonly ILogger<TelegramBotService> _logger;
         private readonly ITelegramBotClient _botClient;
+        private readonly IMessageHandlerFactory _messageHandlerFactory;
+
         private readonly ReceiverOptions _receiverOptions;
 
         public TelegramBotService(
             ITelegramBotClient botClient,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory, 
+            IMessageHandlerFactory messageHandlerFactory)
         {
             _logger = loggerFactory.CreateLogger<TelegramBotService>();
             _botClient = botClient;
+            _messageHandlerFactory = messageHandlerFactory;
+
             _receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = new[] { UpdateType.Message }
@@ -50,36 +56,15 @@ namespace DogLiveBot.BL.Services
         {
             try
             {
-                switch (update.Type)
+                if (update.Message != null)
                 {
-                    case UpdateType.Message:
-                        await HandleMessage(update.Message, cancellationToken);
-                        break;
-                    default:
-                        _logger.LogWarning($"Unhandled update type: {update.Type}");
-                        break;
+                    var handler = _messageHandlerFactory.GetMessageHandler(update.Message.Type);
+                    await handler.HandleMessage(update.Message, cancellationToken);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error handling update");
-            }
-        }
-
-        /// <summary>
-        /// Обрабатывает входящие сообщения от пользователей.
-        /// </summary>
-        /// <param name="message">Сообщение, полученное от пользователя.</param>
-        /// <param name="cancellationToken">Токен отмены.</param>
-        private async Task HandleMessage(Message message, CancellationToken cancellationToken)
-        {
-            if (message?.Text != null)
-            {
-                _logger.LogInformation($"Received message: {message.Text}");
-            }
-            else
-            {
-                _logger.LogWarning("Received an empty message or a message without text.");
             }
         }
 

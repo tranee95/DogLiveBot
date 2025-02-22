@@ -1,5 +1,12 @@
-using DogLiveBot.BL.ServiceInterface;
-using DogLiveBot.BL.Services;
+using DogLiveBot.BL.Command.CommandFactory;
+using DogLiveBot.BL.Command.CommandImplementation;
+using DogLiveBot.BL.Command.CommandInterface;
+using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
+using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
+using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
+using DogLiveBot.BL.Services.ServiceImplementation;
+using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.Core.Managers.Extensions;
 using DogLiveBot.Core.Options;
 using DogLiveBot.Data.Context;
 using DogLiveBot.Data.Repository.RepositoryImplementations;
@@ -26,6 +33,7 @@ public static class ServicesManager
             RegisterDbContext(services);
             RegisterTelegramBotClient(services);
             RegisterServices(services);
+            RegisterCommands(services);
         });
     }
 
@@ -50,7 +58,7 @@ public static class ServicesManager
         services.AddDbContextFactory<ApplicationDbContext>((provider, contextOptionsBuilder) =>
         {
             var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
-            contextOptionsBuilder.UseSqlite(options.ApplicationDbConnection.ConnectionString);
+            contextOptionsBuilder.UseNpgsql(options.ApplicationDbConnection.ConnectionString);
         });
         services.AddScoped(typeof(IRepository<>), typeof(ApplicationRepository<>));
     }
@@ -66,7 +74,7 @@ public static class ServicesManager
             var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
             return new TelegramBotClient(options.TelegramBotSettings.Token);
         });
-        services.AddTransient<ITelegramBotService, TelegramBotService>();
+        services.AddScoped<ITelegramBotService, TelegramBotService>();
     }
 
     /// <summary>
@@ -75,6 +83,24 @@ public static class ServicesManager
     /// <param name="services">Коллекция сервисов для регистрации.</param>
     private static void RegisterServices(IServiceCollection services)
     {
-        // add service
+        services.AddAutoMapperProfiles();
+        services.AddScoped<IUserService, UserService>();
+
+        services.AddScoped<IMessageHandlerFactory, MessageHandlerFactory>();
+
+        services.AddScoped<IMessageHandler, TextMessageHandler>();
+        services.AddScoped<IMessageHandler, ContactMessageHandler>();
+    }
+
+    /// <summary>
+    /// Регистрирует команды в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterCommands(IServiceCollection services)
+    {
+        services.AddScoped<ICommandFactory, CommandFactory>();
+
+        services.AddScoped<ICommand, StartCommand>();
+        services.AddScoped<ICommand, RegistrationCommand>();
     }
 }

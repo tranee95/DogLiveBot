@@ -1,0 +1,39 @@
+version: '3.8'
+
+volumes:
+  pg_data:
+  #rabbitmq_data:
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: doglifedb
+    volumes:
+      - pg_data:/var/lib/postgresql/data 
+    ports:
+      - "5499:5432"
+    networks:
+      - doglifebot_network 
+
+  #rabbitmq:
+  #  image: rabbitmq:managementls
+  #  container_name: rabbitmq
+  #  restart: always
+  #  environment:
+  #    RABBITMQ_DEFAULT_USER: rmuser
+  #    RABBITMQ_DEFAULT_PASS: rmpassword
+  #  volumes:
+  #    - rabbitmq_data:/var/lib/rabbitmq
+  #  ports:
+  #    - "15672:15672"
+  #    - "5672:5672"
+  #  networks:
+  #    - doglifebot_network 
+
+networks:
+  doglifebot_network:

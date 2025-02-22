@@ -1,4 +1,4 @@
-using DogLiveBot.BL.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Core.Managers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

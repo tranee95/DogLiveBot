@@ -1,4 +1,4 @@
-namespace DogLiveBot.BL.ServiceInterface
+namespace DogLiveBot.BL.Services.ServiceInterface
 {
     public interface ITelegramBotService
     {

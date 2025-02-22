@@ -24,25 +24,39 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public T? GetById(Guid id)
-    {
-        using (var context = _contextFactory.CreateDbContext())
-        {
-            return context.Set<T>().Find(id);
-        }
-    }
-
-    /// <inheritdoc/>
-    public async Task AddAsync(T entity, CancellationToken cancellationToken)
+    public async Task<T?> GetById(Guid id, CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            await context.Set<T>().AddAsync(entity, cancellationToken);
+            return await context.Set<T>().FindAsync(id, cancellationToken);
         }
     }
 
     /// <inheritdoc/>
-    public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    public async Task<bool> IfExists(Func<T, bool> func, CancellationToken cancellationToken)
+    {
+        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            var entities = context.Set<T>().Where(func);
+            return entities.Any();
+        }
+    }
+
+
+    /// <inheritdoc/>
+    public async Task Add(T entity, CancellationToken cancellationToken)
+    {
+        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            entity.CreateDate = DateTime.UtcNow;
+            
+            await context.Set<T>().AddAsync(entity, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task Update(T entity, CancellationToken cancellationToken)
     {
         entity.ModifiedDate = DateTime.Now;
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
@@ -53,16 +67,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-    {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
-        {
-            return await context.Set<T>().FindAsync(id, cancellationToken);
-        }
-    }
-
-    /// <inheritdoc/>
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<bool> Delete(Guid id, CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -79,7 +84,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<bool> DeleteAsync(T entity, CancellationToken cancellationToken)
+    public async Task<bool> Delete(T entity, CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -97,24 +102,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public bool Delete(ICollection<T> entities)
-    {
-        using (var context = _contextFactory.CreateDbContext())
-        {
-            var findEntities = context.Set<T>().Where(t => entities.Contains(t));
-            foreach (var item in findEntities)
-            {
-                item.DeleteDate = DateTime.Now;
-            }
-
-            context.SaveChanges();
-
-            return true;
-        }
-    }
-
-    /// <inheritdoc/>
-    public async Task<bool> HardDeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<bool> HardDelete(Guid id, CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -132,7 +120,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<bool> HardDeleteAsync(T? entity, CancellationToken cancellationToken)
+    public async Task<bool> HardDelete(T? entity, CancellationToken cancellationToken)
     {
         if (entity is null)
         {
@@ -149,42 +137,16 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public bool HardDelete(ICollection<T>? entities)
+    public async Task<ICollection<T>> Where(Func<T, bool> func, CancellationToken cancellationToken)
     {
-        if (entities == null || !entities.Any())
-        {
-            return false;
-        }
-
-        using (var context = _contextFactory.CreateDbContext())
-        {
-            context.Set<T>().RemoveRange(entities);
-            context.SaveChanges();
-
-            return true;
-        }
-    }
-
-    /// <inheritdoc/>
-    public ICollection<T> Where(Func<T, bool> func)
-    {
-        using (var context = _contextFactory.CreateDbContext())
+        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             return context.Set<T>().Where(func).ToArray();
         }
     }
 
     /// <inheritdoc/>
-    public void Save()
-    {
-        using (var context = _contextFactory.CreateDbContext())
-        {
-            context.SaveChanges();
-        }
-    }
-
-    /// <inheritdoc/>
-    public async Task SaveAsync(CancellationToken cancellationToken)
+    public async Task Save(CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {

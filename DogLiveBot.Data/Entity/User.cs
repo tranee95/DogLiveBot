@@ -9,9 +9,9 @@ public class User : BaseEntity<Guid>
     /// Идентификатор пользователя в Telegram.
     /// </summary>
     /// <value>
-    /// Идентификатор пользователя в Telegram. Может быть <c>null</c>, если пользователь не зарегистрирован в Telegram.
+    /// Идентификатор пользователя в Telegram.
     /// </value>
-    public long? TelegramId { get; set; }
+    public long TelegramId { get; set; }
 
     /// <summary>
     /// Номер телефона пользователя.

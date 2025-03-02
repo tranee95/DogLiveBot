@@ -82,6 +82,13 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     Task<ICollection<T>> Where(Func<T, bool> func, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Получает последнюю сущность.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<T> GetLast(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Сохраняет изменения в репозитории.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>

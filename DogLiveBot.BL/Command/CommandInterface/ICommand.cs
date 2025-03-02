@@ -7,5 +7,7 @@ public interface ICommand
 {
     public CommandTypeEnum CommandType { get; }
     
-    public Task Execute(Message message, CancellationToken cancellationToken);
+    public CommandTypeEnum BackCommandType { get; }
+    
+    public Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null);
 }

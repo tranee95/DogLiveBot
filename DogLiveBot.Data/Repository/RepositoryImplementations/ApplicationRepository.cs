@@ -146,6 +146,15 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
+    public async Task<T> GetLast(CancellationToken cancellationToken)
+    {
+        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            return await context.Set<T>().OrderByDescending(s => s.CreateDate).FirstAsync(cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task Save(CancellationToken cancellationToken)
     {
         using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))

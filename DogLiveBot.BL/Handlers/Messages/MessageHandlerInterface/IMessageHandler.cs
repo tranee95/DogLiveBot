@@ -7,5 +7,5 @@ public interface IMessageHandler
 {
     public MessageType MessageType { get; }
     
-    public Task HandleMessage(Message message, CancellationToken cancellationToken);
+    public Task HandleMessage(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null);
 }

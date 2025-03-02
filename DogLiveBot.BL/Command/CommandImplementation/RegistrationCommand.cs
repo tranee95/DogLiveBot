@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+
 using User = DogLiveBot.Data.Entity.User;
 
 namespace DogLiveBot.BL.Command.CommandImplementation;
@@ -29,22 +30,27 @@ public class RegistrationCommand : ICommand
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
     private readonly ITelegramBotClient _botClient;
+    private readonly IKeyboardService _keyboardService;
 
     public RegistrationCommand(
         ILoggerFactory loggerFactory, 
         IMapper mapper, 
         IUserService userService,
-        ITelegramBotClient botClient)
+        ITelegramBotClient botClient, 
+        IKeyboardService keyboardService)
     {
         _logger = loggerFactory.CreateLogger<RegistrationCommand>();
         _mapper = mapper;
         _userService = userService;
         _botClient = botClient;
+        _keyboardService = keyboardService;
     }
 
     public CommandTypeEnum CommandType => CommandTypeEnum.Registration;
+    
+    public CommandTypeEnum BackCommandType => CommandTypeEnum.Empty;
 
-    public async Task Execute(Message message, CancellationToken cancellationToken)
+    public async Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
         var user = _mapper.Map<Contact, User>(message.Contact); 
         var isCreate = await _userService.CreateIfNotExistAsync(user, cancellationToken);
@@ -61,5 +67,8 @@ public class RegistrationCommand : ICommand
             await _botClient.SendMessage(message.Chat.Id, MessageText.YouHaveSuccessfullyRegistered, 
                 replyMarkup: new ReplyKeyboardRemove(), cancellationToken: cancellationToken);  
         }
+
+        await _botClient.SendMessage(message.Chat.Id, MessageText.Rules, replyMarkup:
+            _keyboardService.GetMainMenu(), cancellationToken: cancellationToken);
     }
 }

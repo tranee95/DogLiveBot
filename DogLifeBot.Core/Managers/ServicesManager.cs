@@ -85,6 +85,7 @@ public static class ServicesManager
     {
         services.AddAutoMapperProfiles();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IKeyboardService, KeyboardService>();
 
         services.AddScoped<IMessageHandlerFactory, MessageHandlerFactory>();
 
@@ -102,5 +103,14 @@ public static class ServicesManager
 
         services.AddScoped<ICommand, StartCommand>();
         services.AddScoped<ICommand, RegistrationCommand>();
+        services.AddScoped<ICommand, MyNotesCommand>();
+        services.AddScoped<ICommand, RulesCommand>();
+        services.AddScoped<ICommand, SettingsCommand>();
+        services.AddScoped<ICommand, ShowPaymentDetailsCommand>();
+        services.AddScoped<ICommand, SignUpForClassCommand>();
+        services.AddScoped<ICommand, RenameCommand>();
+        services.AddScoped<ICommand, AddDogCommand>();
+        services.AddScoped<ICommand, BackCommand>();
+        services.AddScoped<ICommand, MenuCommand>();
     }
 }

@@ -7,26 +7,31 @@ using Telegram.Bot.Types;
 
 namespace DogLiveBot.BL.Command.CommandImplementation;
 
-public class StartCommand : ICommand
+public class MenuCommand : ICommand
 {
     private readonly ITelegramBotClient _botClient;
     private readonly IKeyboardService _keyboardService;
 
-    public StartCommand(
-        ITelegramBotClient botClient, 
-        IKeyboardService keyboardService)
+    public MenuCommand(
+        IKeyboardService keyboardService,
+        ITelegramBotClient botClient)
     {
-        _botClient = botClient;
         _keyboardService = keyboardService;
+        _botClient = botClient;
     }
 
-    public CommandTypeEnum CommandType => CommandTypeEnum.Start;
+    public CommandTypeEnum CommandType => CommandTypeEnum.Menu;
 
     public CommandTypeEnum BackCommandType => CommandTypeEnum.Empty;
 
     public async Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
-        await _botClient.SendMessage(message.Chat.Id, MessageText.CompleteShortRegistration,
-            replyMarkup: _keyboardService.GetCompleteShortRegistrationMenu(), cancellationToken: cancellationToken);
+        await _botClient.SendMessage(message.Chat.Id, MessageText.SelectAction,
+            replyMarkup: _keyboardService.GetMainMenu(), cancellationToken: cancellationToken);
+
+        if (callbackQuery != null)
+        {
+            await _botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: cancellationToken);
+        }
     }
 }

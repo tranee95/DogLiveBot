@@ -5,5 +5,6 @@ namespace DogLiveBot.BL.Command.CommandFactory;
 
 public interface ICommandFactory
 {
-    ICommand GetCommand(CommandTypeEnum type);
+    ICommand GetCommand(CommandTypeEnum? type);
+    ICommand GetBackCommand(CommandTypeEnum? type);
 }

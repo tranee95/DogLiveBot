@@ -27,7 +27,7 @@ public class ContactMessageHandler : IMessageHandler
     /// </summary>
     /// <param name="message">Сообщение, полученное от пользователя.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
-    public async Task HandleMessage(Message message, CancellationToken cancellationToken)
+    public async Task HandleMessage(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
         if (message != null)
         {

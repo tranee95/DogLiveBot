@@ -42,6 +42,8 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 
             await _dogRepository.Add(dog, cancellationToken);
         }
+
+        // TODO: Реализовать уведомление об успешном добавлении собаки
     }
 
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,

@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<Dog> Dogs { get; set; }
     public DbSet<UserCallbackQuery> UserCallbackQuerys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,6 +20,7 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new DogConfiguration());
         modelBuilder.ApplyConfiguration(new UserCallbackQueryConfiguration());
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DogLiveBot.Data.Entity;
 
 namespace DogLiveBot.Data.Repository.RepositoryInterfaces;
@@ -12,15 +13,23 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     Task<ICollection<T>> GetAllAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Получает сущность.
+    /// </summary>
+    /// <param name="func">Функция фильтрации.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <returns>Сущность или null, если не найдена.</returns>
+    Task<T?> Get(Expression<Func<T, bool>> func, CancellationToken cancellationToken);
+    
+    /// <summary>
     /// Получает сущность по уникальному идентификатору.
     /// </summary>
     /// <param name="id">Уникальный идентификатор сущности.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     /// <returns>Сущность или null, если не найдена.</returns>
     Task<T?> GetById(Guid id, CancellationToken cancellationToken);
-
+    
     /// <summary>
-    /// Получает наличие сущности по уникальному идентификатору
+    /// Получает наличие сущности.
     /// </summary>
     /// <param name="func">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
@@ -84,9 +93,10 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <summary>
     /// Получает последнюю сущность.
     /// </summary>
+    /// <param name="func">Функция фильтрации.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<T> GetLast(CancellationToken cancellationToken);
+    Task<T?> GetLast(Expression<Func<T, bool>> func, CancellationToken cancellationToken);
 
     /// <summary>
     /// Сохраняет изменения в репозитории.

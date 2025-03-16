@@ -19,10 +19,10 @@ public class UserCallbackQueryConfiguration : IEntityTypeConfiguration<UserCallb
         builder.Property(u => u.ChatId)
             .IsRequired();
 
-        builder.HasOne<User>()
-            .WithMany()
-            .HasForeignKey(uc => uc.UserTelegramId)
-            .HasPrincipalKey(u => u.TelegramId)
+        builder.HasOne(u => u.User)
+            .WithOne(u => u.UserCallbackQuery)
+            .HasForeignKey<UserCallbackQuery>(s => s.UserTelegramId)
+            .HasPrincipalKey<User>(u => u.TelegramId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -13,7 +13,7 @@ public static class CommandTypeEnumHelper
     /// Возвращает значение <see cref="CommandTypeEnum"/>, соответствующее заданному описанию команды,
     /// или <c>null</c>, если описание не найдено.
     /// </returns>
-    public static CommandTypeEnum? GetCommandTypeEnum(string commandTextType)
+    public static CommandTypeEnum? GetCommandTypeEnum(string? commandTextType)
     {
         var type = typeof(CommandTypeEnum);
         foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static))

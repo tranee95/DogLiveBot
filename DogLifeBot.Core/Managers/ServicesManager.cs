@@ -1,6 +1,7 @@
 using DogLiveBot.BL.Command.CommandFactory;
 using DogLiveBot.BL.Command.CommandImplementation;
 using DogLiveBot.BL.Command.CommandInterface;
+using DogLiveBot.BL.Command.ReceivedTextCommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
@@ -112,5 +113,8 @@ public static class ServicesManager
         services.AddScoped<ICommand, AddDogCommand>();
         services.AddScoped<ICommand, BackCommand>();
         services.AddScoped<ICommand, MenuCommand>();
+
+        services.AddScoped<IReceivedTextCommandFactory, ReceivedTextCommandFactory>();
+        services.AddScoped<IReceivedTextCommand, AddDogCommand>();
     }
 }

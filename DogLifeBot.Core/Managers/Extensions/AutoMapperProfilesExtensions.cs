@@ -20,7 +20,7 @@ public static class AutoMapperProfilesExtensions
             var profiles = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(type =>
-                    typeof(Profile).IsAssignableFrom(type) && !type.IsAbstract && !type.FullName.Contains("AutoMapper"))
+                    typeof(Profile).IsAssignableFrom(type) && !type.FullName.Contains("AutoMapper"))
                 .ToList();
 
             foreach (var profile in profiles)

@@ -8,18 +8,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(u => u.Id);
-        
-        builder.Property(u => u.TelegramId)
+        builder.HasKey(s => s.Id);
+
+        builder.Property(s => s.TelegramId)
             .IsRequired();
 
-        builder.Property(u => u.PhoneNumber)
+        builder.Property(s => s.PhoneNumber)
             .IsRequired();
 
-        builder.Property(u => u.FirstName)
+        builder.Property(s => s.FirstName)
             .IsRequired();
 
-        builder.Property(u => u.LastName)
+        builder.Property(s => s.LastName)
             .IsRequired(false);
     }
 }

@@ -1,8 +1,5 @@
-using AutoMapper;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Entity;
-using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -14,38 +11,19 @@ namespace DogLiveBot.BL.Services.ServiceImplementation
 {
     public class TelegramBotService : ITelegramBotService
     {
-        public class MapperProfile : Profile
-        {
-            public MapperProfile()
-            {
-                CreateMap<CallbackQuery, UserCallbackQuery>()
-                    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
-                    .ForMember(dest => dest.UserTelegramId, opt => opt.MapFrom(src => src.From.Id))
-                    .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Data))
-                    .ForMember(dest => dest.ChatId, opt => opt.MapFrom(src => src.Message.Chat.Id))
-                    .ForMember(dest => dest.CallbackQueryId, opt => opt.MapFrom(src => src.Id));
-            }
-        }
-        
         private readonly ILogger<TelegramBotService> _logger;
         private readonly ITelegramBotClient _botClient;
         private readonly IMessageHandlerFactory _messageHandlerFactory;
         private readonly ReceiverOptions _receiverOptions;
-        private readonly IRepository<UserCallbackQuery> _userCallbackQueryRepository;
-        private readonly IMapper _mapper;
 
         public TelegramBotService(
             ITelegramBotClient botClient,
             ILoggerFactory loggerFactory, 
-            IMessageHandlerFactory messageHandlerFactory, 
-            IRepository<UserCallbackQuery> userCallbackQueryRepository, 
-            IMapper mapper)
+            IMessageHandlerFactory messageHandlerFactory)
         {
             _logger = loggerFactory.CreateLogger<TelegramBotService>();
             _botClient = botClient;
             _messageHandlerFactory = messageHandlerFactory;
-            _userCallbackQueryRepository = userCallbackQueryRepository;
-            _mapper = mapper;
 
             _receiverOptions = new ReceiverOptions
             {
@@ -88,10 +66,7 @@ namespace DogLiveBot.BL.Services.ServiceImplementation
                 if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery?.Message != null)
                 {
                     var handler = _messageHandlerFactory.GetMessageHandler(MessageType.Text);
-                    await handler.HandleMessage(update.Message, cancellationToken, update.CallbackQuery); 
-
-                    var userCallbackQuery = _mapper.Map<CallbackQuery, UserCallbackQuery>(update.CallbackQuery);
-                    await _userCallbackQueryRepository.Add(userCallbackQuery, cancellationToken);
+                    await handler.HandleMessage(update.Message, cancellationToken, update.CallbackQuery);
                 }
             }
             catch (Exception ex)

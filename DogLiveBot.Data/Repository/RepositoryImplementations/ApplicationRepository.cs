@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DogLiveBot.Data.Context;
 using DogLiveBot.Data.Entity;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
@@ -17,16 +18,25 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task<ICollection<T>> GetAllAsync(CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             return await context.Set<T>().ToListAsync(cancellationToken);
         }
     }
 
     /// <inheritdoc/>
+    public async Task<T?> Get(Expression<Func<T, bool>> func, CancellationToken cancellationToken)
+    {
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            return await context.Set<T>().FirstOrDefaultAsync(func, cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task<T?> GetById(Guid id, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             return await context.Set<T>().FindAsync(id, cancellationToken);
         }
@@ -35,7 +45,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task<bool> IfExists(Func<T, bool> func, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var entities = context.Set<T>().Where(func);
             return entities.Any();
@@ -46,7 +56,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task Add(T entity, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             entity.CreateDate = DateTime.UtcNow;
             
@@ -58,10 +68,12 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task Update(T entity, CancellationToken cancellationToken)
     {
-        entity.ModifiedDate = DateTime.Now;
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        entity.ModifiedDate = DateTime.UtcNow;
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            context.Set<T>().Update(entity);
+            context.Set<T>().Attach(entity);
+            context.Entry(entity).State = EntityState.Modified;
+
             await context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -69,7 +81,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task<bool> Delete(Guid id, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var entity = await context.Set<T>().FindAsync(id, cancellationToken);
             if (entity is null)
@@ -86,7 +98,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task<bool> Delete(T entity, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var findAsync = await context.Set<T>().FindAsync(entity.Id, cancellationToken);
             if (findAsync is null)
@@ -127,7 +139,7 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
             return false;
         }
 
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             context.Set<T>().Remove(entity);
             await context.SaveChangesAsync(cancellationToken);
@@ -139,25 +151,26 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     /// <inheritdoc/>
     public async Task<ICollection<T>> Where(Func<T, bool> func, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             return context.Set<T>().Where(func).ToArray();
         }
     }
 
     /// <inheritdoc/>
-    public async Task<T> GetLast(CancellationToken cancellationToken)
+    public async Task<T?> GetLast(Expression<Func<T, bool>> func, CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            return await context.Set<T>().OrderByDescending(s => s.CreateDate).FirstAsync(cancellationToken);
+            return await context.Set<T>()
+                .OrderByDescending(s => s.CreateDate).LastOrDefaultAsync(func, cancellationToken);
         }
     }
 
     /// <inheritdoc/>
     public async Task Save(CancellationToken cancellationToken)
     {
-        using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             await context.SaveChangesAsync(cancellationToken);
         }

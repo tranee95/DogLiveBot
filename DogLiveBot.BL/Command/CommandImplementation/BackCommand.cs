@@ -31,7 +31,7 @@ public class BackCommand : ICommand
 
     public async Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
-        var userCallbackQuery = await _userCallbackQueryRepository.GetLast(cancellationToken);
+        var userCallbackQuery = await _userCallbackQueryRepository.Get(s => s.UserTelegramId == message.Chat.Id, cancellationToken);
         var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
 
         var command = _commandFactory.GetBackCommand(commandType);

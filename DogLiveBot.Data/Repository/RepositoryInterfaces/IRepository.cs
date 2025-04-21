@@ -15,11 +15,23 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <summary>
     /// Получает сущность.
     /// </summary>
-    /// <param name="func">Функция фильтрации.</param>
+    /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
     /// <returns>Сущность или null, если не найдена.</returns>
-    Task<T?> Get(Expression<Func<T, bool>> func, CancellationToken cancellationToken);
-    
+    Task<T?> Get(Expression<Func<T, bool>> filter, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Получает выбранные данные из сущности, соответствующей заданному фильтру.
+    /// </summary>
+    /// <param name="filter">Функция фильтрации, определяющая условия для поиска сущности.</param>
+    /// <param name="selector">Функция выбора, определяющая, какие данные должны быть возвращены.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <returns>Выбранные данные типа <typeparamref name="TResult"/> или <c>null</c>, если сущность не найдена.</returns>
+    Task<TResult?> GetSelected<TResult>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TResult>> selector,
+        CancellationToken cancellationToken);
+
     /// <summary>
     /// Получает сущность по уникальному идентификатору.
     /// </summary>
@@ -31,10 +43,10 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <summary>
     /// Получает наличие сущности.
     /// </summary>
-    /// <param name="func">Функция фильтрации.</param>
+    /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     /// <returns>Наличие сущности</returns>
-    Task<bool> IfExists(Func<T, bool> func, CancellationToken cancellationToken);
+    Task<bool> IfExists(Func<T, bool> filter, CancellationToken cancellationToken);
 
     /// <summary>
     /// Добавляет новую сущность в репозиторий.
@@ -85,18 +97,30 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <summary>
     /// Фильтрует сущности по заданному условию.
     /// </summary>
-    /// <param name="func">Функция фильтрации.</param>
+    /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     /// <returns>Коллекция сущностей, соответствующих условию.</returns>
-    Task<ICollection<T>> Where(Func<T, bool> func, CancellationToken cancellationToken);
+    Task<ICollection<T>> Where(Func<T, bool> filter, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Получает выбранные данные из сущности, соответствующей заданному фильтру.
+    /// </summary>
+    /// <param name="filter">Функция фильтрации, определяющая условия для поиска сущности.</param>
+    /// <param name="selector">Функция выбора, определяющая, какие данные должны быть возвращены.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <returns>Выбранные данные типа <typeparamref name="TResult"/> или <c>null</c>, если сущность не найдена.</returns>
+    Task<ICollection<TResult>> WhereSelected<TResult>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TResult>> selector,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Получает последнюю сущность.
     /// </summary>
-    /// <param name="func">Функция фильтрации.</param>
+    /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<T?> GetLast(Expression<Func<T, bool>> func, CancellationToken cancellationToken);
+    Task<T?> GetLast(Expression<Func<T, bool>> filter, CancellationToken cancellationToken);
 
     /// <summary>
     /// Сохраняет изменения в репозитории.

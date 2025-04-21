@@ -1,7 +1,10 @@
+using System.Text;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Extensions;
+using DogLiveBot.Data.Model;
 using DogLiveBot.Data.Text;
+using Newtonsoft.Json;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DogLiveBot.BL.Services.ServiceImplementation;
@@ -56,6 +59,11 @@ public class KeyboardService : IKeyboardService
                 InlineKeyboardButton.WithCallbackData(
                     ButtonText.AddDog, CommandTypeEnum.AddDog.GetDescription()),
                 InlineKeyboardButton.WithCallbackData(
+                    ButtonText.DeleteDog, CommandTypeEnum.DeleteDog.GetDescription()),
+            },
+            new InlineKeyboardButton[]
+            {
+                InlineKeyboardButton.WithCallbackData(
                     ButtonText.Rename, CommandTypeEnum.Rename.GetDescription()),
             },
             new InlineKeyboardButton[]
@@ -64,6 +72,28 @@ public class KeyboardService : IKeyboardService
                     ButtonText.Back, CommandTypeEnum.Back.GetDescription())
             },
         };
+
+        return new InlineKeyboardMarkup(menu);
+    }
+
+    public InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDeleteModel> dogsModel)
+    {
+        const int maxByteCount = 64;
+        var menu = new List<InlineKeyboardButton[]>();
+
+        foreach (var item in dogsModel)
+        {
+            var jsonData = JsonConvert.SerializeObject(new { Id = item.Id, CommandType = item.CommandType});
+            if (Encoding.UTF8.GetByteCount(jsonData) > maxByteCount)
+            {
+                throw new Exception("Data size is too big");
+            }
+
+            menu.Add(new []
+            {
+                InlineKeyboardButton.WithCallbackData(item.Name, jsonData),
+            });
+        }
 
         return new InlineKeyboardMarkup(menu);
     }

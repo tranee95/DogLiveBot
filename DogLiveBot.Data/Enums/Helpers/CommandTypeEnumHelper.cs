@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
+using Newtonsoft.Json;
+using JsonException = System.Text.Json.JsonException;
 
 namespace DogLiveBot.Data.Enums.Helpers;
 
@@ -26,5 +28,26 @@ public static class CommandTypeEnumHelper
         }
 
         return null;
+    }
+    
+    /// <summary>
+    /// Пытается десериализовать JSON-строку в объект указанного типа.
+    /// </summary>
+    /// <typeparam name="T">Тип объекта, в который нужно десериализовать JSON.</typeparam>
+    /// <param name="json">JSON-строка для десериализации.</param>
+    /// <param name="result">Результат десериализации, если она прошла успешно.</param>
+    /// <returns>True, если десериализация прошла успешно, иначе False.</returns>
+    public static bool TryParseFromJsonToObject<T>(string json, out T result)
+    {
+        try
+        {
+            result = JsonConvert.DeserializeObject<T>(json);
+            return result != null;
+        }
+        catch (JsonReaderException)
+        {
+            result = default;
+            return false;
+        }
     }
 }

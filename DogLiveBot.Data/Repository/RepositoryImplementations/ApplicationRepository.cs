@@ -25,11 +25,23 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<T?> Get(Expression<Func<T, bool>> func, CancellationToken cancellationToken)
+    public async Task<T?> Get(Expression<Func<T, bool>> filter, CancellationToken cancellationToken)
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            return await context.Set<T>().FirstOrDefaultAsync(func, cancellationToken);
+            return await context.Set<T>().FirstOrDefaultAsync(filter, cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<TResult?> GetSelected<TResult>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TResult>> selector,
+        CancellationToken cancellationToken)
+    {
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            return await context.Set<T>().Where(filter).Select(selector).FirstOrDefaultAsync(cancellationToken);
         }
     }
 
@@ -43,11 +55,11 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<bool> IfExists(Func<T, bool> func, CancellationToken cancellationToken)
+    public async Task<bool> IfExists(Func<T, bool> filter, CancellationToken cancellationToken)
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            var entities = context.Set<T>().Where(func);
+            var entities = context.Set<T>().Where(filter);
             return entities.Any();
         }
     }
@@ -149,21 +161,33 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
     }
 
     /// <inheritdoc/>
-    public async Task<ICollection<T>> Where(Func<T, bool> func, CancellationToken cancellationToken)
+    public async Task<ICollection<T>> Where(Func<T, bool> filter, CancellationToken cancellationToken)
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
-            return context.Set<T>().Where(func).ToArray();
+            return context.Set<T>().Where(filter).ToArray();
         }
     }
 
     /// <inheritdoc/>
-    public async Task<T?> GetLast(Expression<Func<T, bool>> func, CancellationToken cancellationToken)
+    public async Task<ICollection<TResult>> WhereSelected<TResult>(
+        Expression<Func<T, bool>> filter, 
+        Expression<Func<T, TResult>> selector, 
+        CancellationToken cancellationToken)
+    {
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            return context.Set<T>().Where(filter).Select(selector).ToArray();
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<T?> GetLast(Expression<Func<T, bool>> filter, CancellationToken cancellationToken)
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             return await context.Set<T>()
-                .OrderByDescending(s => s.CreateDate).LastOrDefaultAsync(func, cancellationToken);
+                .OrderByDescending(s => s.CreateDate).LastOrDefaultAsync(filter, cancellationToken);
         }
     }
 

@@ -28,4 +28,12 @@ public static class MessageText
     public static readonly string SpecifyName = "Укажите имя:";
     public static readonly string UserSettings = "\u2699\ufe0f Настройки:";
     public static readonly string SelectAction = "Выберите действие";
+    public static readonly string MyDogs = "Мои собаки";
+    public static readonly string UserHasRename = "Вы успешно изменили имя";
+    public static readonly string RenameUserError  = "Ошибка при изменении имени";
+    public static readonly string SetUserName = "Укажите имя";
+    public static readonly string AddDogSuccess = "Вы успешно добавили собаку в свой профиль";
+    public static readonly string AddDogError = "Ошибка добавления собаки";
+    public static readonly string DogDeleted = "Вы успешно удалили собаку из своего профиля";
+    public static readonly string ChooseDog = "Выберете собаку";
 }

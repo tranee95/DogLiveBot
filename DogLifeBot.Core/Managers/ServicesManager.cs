@@ -87,6 +87,7 @@ public static class ServicesManager
         services.AddAutoMapperProfiles();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IKeyboardService, KeyboardService>();
+        services.AddScoped<ICommandService, CommandService>();
 
         services.AddScoped<IMessageHandlerFactory, MessageHandlerFactory>();
 
@@ -95,6 +96,7 @@ public static class ServicesManager
     }
 
     /// <summary>
+   
     /// Регистрирует команды в контейнере зависимостей.
     /// </summary>
     /// <param name="services">Коллекция сервисов для регистрации.</param>
@@ -113,8 +115,10 @@ public static class ServicesManager
         services.AddScoped<ICommand, AddDogCommand>();
         services.AddScoped<ICommand, BackCommand>();
         services.AddScoped<ICommand, MenuCommand>();
+        services.AddScoped<ICommand, DeleteDogCommand>();
 
         services.AddScoped<IReceivedTextCommandFactory, ReceivedTextCommandFactory>();
         services.AddScoped<IReceivedTextCommand, AddDogCommand>();
+        services.AddScoped<IReceivedTextCommand, RenameCommand>();
     }
 }

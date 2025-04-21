@@ -11,31 +11,34 @@ public enum CommandTypeEnum
 
     [Description("/registratin")]
     Registration,
-    
+
     [Description("/signUpForClass")]
     SignUpForClass,
-    
+
     [Description("/myNotes")]
     MyNotes,
-    
+
     [Description("/settings")]
     Settings,
-    
+
     [Description("/showPaymentDetails")]
     ShowPaymentDetails,
-    
+
     [Description("/rules")]
     Rules,
-    
+
     [Description("/addDog")]
     AddDog,
     
+    [Description("/deleteDog")]
+    DeleteDog,
+
     [Description("/rename")]
     Rename,
-    
+
     [Description("/back")]
     Back,
-    
+
     [Description("/menu")]
     Menu
 }

@@ -4,6 +4,7 @@ using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.Data.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Helpers;
+using DogLiveBot.Data.Model;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
@@ -47,15 +48,21 @@ public class TextMessageHandler : IMessageHandler
         if (text != null)
         {
             _logger.LogInformation($"Received {(callbackQuery == null ? "message" : "callbackQuery")}: {text}");
-            var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(text);
-
-            if (commandType.HasValue)
-            {
-                await ExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery);
+            
+            if (CommandTypeEnumHelper.TryParseFromJsonToObject<CommandDataModel>(text, out CommandDataModel commandData))
+            { 
+                //TODO: тут необходимо добавить реализацию обработки данных команды 
+                //TODO: HandleReceiveData
+                await ExecuteCommand(commandData.CommandType, executeMessage, cancellationToken, callbackQuery);
             }
             else
             {
-                await HandleReceivedText(message, cancellationToken);
+                var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(text);
+                var task = commandType.HasValue 
+                    ? ExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery) 
+                    : HandleReceivedText(message, cancellationToken);
+
+                await task.WaitAsync(cancellationToken);
             }
         }
     }

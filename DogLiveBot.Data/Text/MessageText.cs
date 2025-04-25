@@ -32,8 +32,13 @@ public static class MessageText
     public static readonly string UserHasRename = "Вы успешно изменили имя";
     public static readonly string RenameUserError  = "Ошибка при изменении имени";
     public static readonly string SetUserName = "Укажите имя";
+
+    public static readonly string ChooseDog = "Выберете собаку";
+
     public static readonly string AddDogSuccess = "Вы успешно добавили собаку в свой профиль";
     public static readonly string AddDogError = "Ошибка добавления собаки";
+
+    public static readonly string DeleteDogError = "Ошибка удаления собаки";
+    public static readonly string DeleteDogSuccess = "Собака удалена из профиля";
     public static readonly string DogDeleted = "Вы успешно удалили собаку из своего профиля";
-    public static readonly string ChooseDog = "Выберете собаку";
 }

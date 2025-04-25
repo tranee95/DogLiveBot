@@ -1,4 +1,5 @@
 using DogLiveBot.BL.Command.CommandFactory;
+using DogLiveBot.BL.Command.ReceivedDataCommandFactory;
 using DogLiveBot.BL.Command.ReceivedTextCommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.Data.Entity;
@@ -7,6 +8,7 @@ using DogLiveBot.Data.Enums.Helpers;
 using DogLiveBot.Data.Model;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -17,17 +19,20 @@ public class TextMessageHandler : IMessageHandler
     private readonly ILogger<TextMessageHandler> _logger;
     private readonly ICommandFactory _commandFactory;
     private readonly IReceivedTextCommandFactory _receivedTextCommandFactory;
+    private readonly IReceivedDataCommandFactory _receivedDataCommandFactory;
     private readonly IRepository<UserCallbackQuery> _userCallbackQueryRepository;
 
     public TextMessageHandler(
         ILogger<TextMessageHandler> logger,
         ICommandFactory commandFactory, 
         IReceivedTextCommandFactory receivedTextCommandFactory,
+        IReceivedDataCommandFactory receivedDataCommandFactory,
         IRepository<UserCallbackQuery> userCallbackQueryRepository)
     {
         _logger = logger;
         _commandFactory = commandFactory;
         _receivedTextCommandFactory = receivedTextCommandFactory;
+        _receivedDataCommandFactory = receivedDataCommandFactory;
         _userCallbackQueryRepository = userCallbackQueryRepository;
     }
 
@@ -35,6 +40,8 @@ public class TextMessageHandler : IMessageHandler
 
     /// <summary>
     /// Обрабатывает обновления, полученные от Telegram API.
+    /// Если сообщение или запрос на обратный вызов содержит данные команды, 
+    /// выполняет соответствующую обработку. В противном случае обрабатывает текстовое сообщение.
     /// </summary>
     /// <param name="message">Сообщение, полученное от Telegram.</param>
     /// <param name="callbackQuery">Запрос на обратный вызов.</param>
@@ -48,18 +55,16 @@ public class TextMessageHandler : IMessageHandler
         if (text != null)
         {
             _logger.LogInformation($"Received {(callbackQuery == null ? "message" : "callbackQuery")}: {text}");
-            
-            if (CommandTypeEnumHelper.TryParseFromJsonToObject<CommandDataModel>(text, out CommandDataModel commandData))
+
+            if (TryParseFromJsonToObject<CommandData>(text, out var commandData))
             { 
-                //TODO: тут необходимо добавить реализацию обработки данных команды 
-                //TODO: HandleReceiveData
-                await ExecuteCommand(commandData.CommandType, executeMessage, cancellationToken, callbackQuery);
+                await HandleReceivedData(executeMessage, commandData, cancellationToken, callbackQuery);
             }
             else
             {
                 var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(text);
                 var task = commandType.HasValue 
-                    ? ExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery) 
+                    ? HandleExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery) 
                     : HandleReceivedText(message, cancellationToken);
 
                 await task.WaitAsync(cancellationToken);
@@ -75,7 +80,7 @@ public class TextMessageHandler : IMessageHandler
     /// <param name="executeMessage">Сообщение, с которым будет работать команда.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <param name="callbackQuery">Обратный вызов, полученный от Telegram, если имеется.</param>
-    private async Task ExecuteCommand(CommandTypeEnum commandType, Message executeMessage,
+    private async Task HandleExecuteCommand(CommandTypeEnum commandType, Message executeMessage,
         CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {
         var command = _commandFactory.GetCommand(commandType);
@@ -84,19 +89,56 @@ public class TextMessageHandler : IMessageHandler
 
     /// <summary>
     /// Обрабатывает текст, полученный от пользователя, если он не соответствует известной команде.
-    /// Получает последний запрос пользователя из репозитория и выполняет соответствующую команду на основе данных этого запроса.
+    /// Получает последний запрос пользователя из репозитория и выполняет соответствующую команду 
+    /// на основе данных этого запроса.
     /// </summary>
     /// <param name="message">Сообщение, полученное от Telegram.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     private async Task HandleReceivedText(Message message, CancellationToken cancellationToken)
     {
-        var userCallbackQuery = await _userCallbackQueryRepository.Get(
+        var userCallbackQuery = await _userCallbackQueryRepository.GetFirstOrDefault(
             s => s.UserTelegramId == message.Chat.Id, cancellationToken);
         if (userCallbackQuery != null)
         {
             var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
             var receivedTextCommand = _receivedTextCommandFactory.GetCommand(commandType);
             await receivedTextCommand.ExecuteReceivedTextLogic(message, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Обрабатывает полученные данные команды.
+    /// Получает команду из фабрики команд и вызывает её метод для обработки полученных данных.
+    /// </summary>
+    /// <param name="executeMessage">Сообщение, с которым будет работать команда.</param>
+    /// <param name="commandData">Данные команды, полученные от пользователя.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <param name="callbackQuery">Обратный вызов, полученный от Telegram, если имеется.</param>
+    private async Task HandleReceivedData(Message executeMessage, CommandData commandData, 
+        CancellationToken cancellationToken, CallbackQuery? callbackQuery)
+    {
+        var receivedDataCommand = _receivedDataCommandFactory.GetCommand(commandData.CommandType);
+        await receivedDataCommand.ExecuteReceivedDataLogic(executeMessage, commandData, cancellationToken, callbackQuery);
+    }
+
+    /// <summary>
+    /// Пытается десериализовать JSON-строку в объект указанного типа.
+    /// </summary>
+    /// <typeparam name="T">Тип объекта, в который нужно десериализовать JSON.</typeparam>
+    /// <param name="json">JSON-строка для десериализации.</param>
+    /// <param name="result">Результат десериализации, если она прошла успешно.</param>
+    /// <returns>True, если десериализация прошла успешно, иначе False.</returns>
+    public static bool TryParseFromJsonToObject<T>(string json, out T result)
+    {
+        try
+        {
+            result = JsonConvert.DeserializeObject<T>(json);
+            return result != null;
+        }
+        catch (JsonReaderException)
+        {
+            result = default;
+            return false;
         }
     }
 }

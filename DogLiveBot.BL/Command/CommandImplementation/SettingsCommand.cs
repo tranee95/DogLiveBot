@@ -2,6 +2,7 @@ using AutoMapper;
 using DogLiveBot.BL.Command.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Entity.Extensions;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Model;
@@ -46,12 +47,12 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
 
     private async Task<string> PrepareSettingsMessage(Message message, CancellationToken cancellationToken)
     {
-        var settingsMessageText = await _userRepository.GetSelected<SettingsMessageTextModel>(
+        var settingsMessageText = await _userRepository.GetFirstOrDefaultSelected<SettingsMessageTextModel>(
             filter: s => s.TelegramId == message.Chat.Id,
             selector: s => new SettingsMessageTextModel
             {
                 UserName = $"{s.FirstName}",
-                DogNames = s.Dogs.Select(d => $" - {d.Name}").ToArray()
+                DogNames = s.Dogs.Where(t => t.DeleteDate == null).Select(d => $" - {d.Name}").ToArray()
             },
             cancellationToken: cancellationToken);
 

@@ -1,6 +1,7 @@
 using DogLiveBot.BL.Command.CommandFactory;
 using DogLiveBot.BL.Command.CommandImplementation;
 using DogLiveBot.BL.Command.CommandInterface;
+using DogLiveBot.BL.Command.ReceivedDataCommandFactory;
 using DogLiveBot.BL.Command.ReceivedTextCommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
@@ -96,7 +97,6 @@ public static class ServicesManager
     }
 
     /// <summary>
-   
     /// Регистрирует команды в контейнере зависимостей.
     /// </summary>
     /// <param name="services">Коллекция сервисов для регистрации.</param>
@@ -120,5 +120,8 @@ public static class ServicesManager
         services.AddScoped<IReceivedTextCommandFactory, ReceivedTextCommandFactory>();
         services.AddScoped<IReceivedTextCommand, AddDogCommand>();
         services.AddScoped<IReceivedTextCommand, RenameCommand>();
+
+        services.AddScoped<IReceivedDataCommandFactory, ReceivedDataCommandFactory>();
+        services.AddScoped<IReceivedDataCommand, DeleteDogCommand>();
     }
 }

@@ -32,7 +32,7 @@ public class User : BaseEntity<Guid>
     /// Собаки пользователя
     /// </summary>
     public ICollection<Dog> Dogs { get; set; } = new List<Dog>();
-    
+
     /// <summary>
     /// сущность, содержащую информацию о
     /// запросах вызова пользователей в приложении.

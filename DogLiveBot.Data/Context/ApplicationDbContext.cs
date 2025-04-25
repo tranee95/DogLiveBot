@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DogLiveBot.Data.Configuration;
 using DogLiveBot.Data.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ namespace DogLiveBot.Data.Context;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }

@@ -1,5 +1,4 @@
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Enums.Extensions;
 
 namespace DogLiveBot.Data.Model;
 

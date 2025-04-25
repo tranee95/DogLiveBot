@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Enums;
@@ -83,7 +84,8 @@ public class KeyboardService : IKeyboardService
 
         foreach (var item in dogsModel)
         {
-            var jsonData = JsonConvert.SerializeObject(new { Id = item.Id, CommandType = item.CommandType});
+            var jsonData = JsonConvert.SerializeObject(new { Id = item.Id, CommandType = item.CommandType });
+
             if (Encoding.UTF8.GetByteCount(jsonData) > maxByteCount)
             {
                 throw new Exception("Data size is too big");

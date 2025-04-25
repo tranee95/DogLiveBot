@@ -6,19 +6,18 @@ namespace DogLiveBot.Data.Repository.RepositoryInterfaces;
 public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
 {
     /// <summary>
-    /// Получает все сущности из репозитория.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
-    /// <returns>Список всех сущностей.</returns>
-    Task<ICollection<T>> GetAllAsync(CancellationToken cancellationToken);
-
-    /// <summary>
     /// Получает сущность.
     /// </summary>
     /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
     /// <returns>Сущность или null, если не найдена.</returns>
-    Task<T?> Get(Expression<Func<T, bool>> filter, CancellationToken cancellationToken);
+    Task<T?> GetFirstOrDefault(
+        Expression<Func<T, bool>> filter, 
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 
     /// <summary>
     /// Получает выбранные данные из сущности, соответствующей заданному фильтру.
@@ -26,27 +25,29 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <param name="filter">Функция фильтрации, определяющая условия для поиска сущности.</param>
     /// <param name="selector">Функция выбора, определяющая, какие данные должны быть возвращены.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
     /// <returns>Выбранные данные типа <typeparamref name="TResult"/> или <c>null</c>, если сущность не найдена.</returns>
-    Task<TResult?> GetSelected<TResult>(
+    Task<TResult?> GetFirstOrDefaultSelected<TResult>(
         Expression<Func<T, bool>> filter,
         Expression<Func<T, TResult>> selector,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 
-    /// <summary>
-    /// Получает сущность по уникальному идентификатору.
-    /// </summary>
-    /// <param name="id">Уникальный идентификатор сущности.</param>
-    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
-    /// <returns>Сущность или null, если не найдена.</returns>
-    Task<T?> GetById(Guid id, CancellationToken cancellationToken);
-    
     /// <summary>
     /// Получает наличие сущности.
     /// </summary>
     /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
     /// <returns>Наличие сущности</returns>
-    Task<bool> IfExists(Func<T, bool> filter, CancellationToken cancellationToken);
+    Task<bool> IfExists(
+        Expression<Func<T, bool>> filter, 
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 
     /// <summary>
     /// Добавляет новую сущность в репозиторий.
@@ -79,28 +80,18 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     Task<bool> Delete(T entity, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Выполняет жесткое удаление сущности по уникальному идентификатору.
-    /// </summary>
-    /// <param name="id">Уникальный идентификатор сущности.</param>
-    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
-    /// <returns>Истина, если удаление прошло успешно; иначе - ложь.</returns>
-    Task<bool> HardDelete(Guid id, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Выполняет жесткое удаление указанной сущности.
-    /// </summary>
-    /// <param name="entity">Сущность для жесткого удаления.</param>
-    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
-    /// <returns>Истина, если удаление прошло успешно; иначе - ложь.</returns>
-    Task<bool> HardDelete(T? entity, CancellationToken cancellationToken);
-
-    /// <summary>
     /// Фильтрует сущности по заданному условию.
     /// </summary>
     /// <param name="filter">Функция фильтрации.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
     /// <returns>Коллекция сущностей, соответствующих условию.</returns>
-    Task<ICollection<T>> Where(Func<T, bool> filter, CancellationToken cancellationToken);
+    Task<ICollection<T>> Where(
+        Expression<Func<T, bool>> filter, 
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 
     /// <summary>
     /// Получает выбранные данные из сущности, соответствующей заданному фильтру.
@@ -108,23 +99,27 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <param name="filter">Функция фильтрации, определяющая условия для поиска сущности.</param>
     /// <param name="selector">Функция выбора, определяющая, какие данные должны быть возвращены.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
     /// <returns>Выбранные данные типа <typeparamref name="TResult"/> или <c>null</c>, если сущность не найдена.</returns>
     Task<ICollection<TResult>> WhereSelected<TResult>(
         Expression<Func<T, bool>> filter,
         Expression<Func<T, TResult>> selector,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 
     /// <summary>
     /// Получает последнюю сущность.
     /// </summary>
     /// <param name="filter">Функция фильтрации.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<T?> GetLast(Expression<Func<T, bool>> filter, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Сохраняет изменения в репозитории.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
-    Task Save(CancellationToken cancellationToken);
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции</param>
+    /// <param name="getDeleted">Учитывать удаленные записи</param>
+    /// <param name="asNoTracking">Применять кеширование запроса</param>
+    /// <returns>Выбранные данные типа <typeparamref name="T"/> или <c>null</c>, если сущность не найдена.</returns>
+    Task<T?> GetLast(
+        Expression<Func<T, bool>> filter, 
+        CancellationToken cancellationToken,
+        bool getDeleted = false,
+        bool asNoTracking = true);
 }

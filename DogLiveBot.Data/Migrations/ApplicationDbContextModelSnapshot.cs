@@ -48,7 +48,7 @@ namespace DogLiveBot.Data.Migrations
 
                     b.HasIndex("UserTelegramId");
 
-                    b.ToTable("Dogs");
+                    b.ToTable("Dogs", (string)null);
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Entity.User", b =>
@@ -82,7 +82,7 @@ namespace DogLiveBot.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Entity.UserCallbackQuery", b =>
@@ -119,7 +119,7 @@ namespace DogLiveBot.Data.Migrations
                     b.HasIndex("UserTelegramId")
                         .IsUnique();
 
-                    b.ToTable("UserCallbackQuerys");
+                    b.ToTable("UserCallbackQuerys", (string)null);
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Entity.Dog", b =>

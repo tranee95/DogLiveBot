@@ -44,7 +44,7 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         {
             if (!string.IsNullOrWhiteSpace(message.Text))
             {
-                var user = await _userRepository.Get(s => s.TelegramId == message.Chat.Id, cancellationToken);
+                var user = await _userRepository.GetFirstOrDefault(s => s.TelegramId == message.Chat.Id, cancellationToken);
                 if (user != null)
                 {
                     user.FirstName = message.Text.Trim();

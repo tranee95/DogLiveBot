@@ -1,6 +1,8 @@
 using DogLiveBot.BL.Command.CommandFactory;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Enums;
+using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Enums.Helpers;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
@@ -28,8 +30,14 @@ public class CommandService : ICommandService
     public async Task ExecuteGoBackCommand(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
     {
-        var userCallbackQuery = await _userCallbackQueryRepository.Get(s => s.UserTelegramId == message.Chat.Id, cancellationToken);
-        var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery?.Data);
+        var userCallbackQuery = await _userCallbackQueryRepository.GetFirstOrDefault(s => s.UserTelegramId == message.Chat.Id, cancellationToken);
+
+        if (userCallbackQuery == null)
+        {
+            throw new NullReferenceException("Back Command is null");
+        }
+
+        var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
 
         var command = _commandFactory.GetBackCommand(commandType);
         await command.Execute(message, cancellationToken, callbackQuery);

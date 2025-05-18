@@ -1,4 +1,4 @@
-namespace DogLiveBot.Core.Options;
+namespace DogLiveBot.Data.Options;
 
 /// <summary>
 /// Настройки подключения к базе данных приложения.

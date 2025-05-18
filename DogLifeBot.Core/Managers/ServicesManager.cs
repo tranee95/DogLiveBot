@@ -9,8 +9,8 @@ using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.BL.Services.ServiceImplementation;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Core.Managers.Extensions;
-using DogLiveBot.Core.Options;
 using DogLiveBot.Data.Context;
+using DogLiveBot.Data.Options;
 using DogLiveBot.Data.Repository.RepositoryImplementations;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +34,7 @@ public static class ServicesManager
             RegisterOptions(services, context);
             RegisterDbContext(services);
             RegisterTelegramBotClient(services);
+            RegisterRedis(services);
             RegisterServices(services);
             RegisterCommands(services);
         });
@@ -80,6 +81,19 @@ public static class ServicesManager
     }
 
     /// <summary>
+    /// Регистрирует Redis-кеш в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для внедрения зависимостей.</param>
+    private static void RegisterRedis(IServiceCollection services)
+    {
+        services.AddStackExchangeRedisCache(opt =>
+        {
+            var options = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
+            opt.Configuration = $"{options.RedisSettings.Host}:{options.RedisSettings.Port}";
+        });
+    }
+
+    /// <summary>
     /// Регистрирует дополнительные сервисы в контейнере зависимостей.
     /// </summary>
     /// <param name="services">Коллекция сервисов для регистрации.</param>
@@ -94,6 +108,7 @@ public static class ServicesManager
 
         services.AddScoped<IMessageHandler, TextMessageHandler>();
         services.AddScoped<IMessageHandler, ContactMessageHandler>();
+        services.AddScoped<ICacheService, CacheService>();
     }
 
     /// <summary>

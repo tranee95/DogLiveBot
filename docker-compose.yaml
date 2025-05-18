@@ -2,7 +2,7 @@ version: '3.8'
 
 volumes:
   pg_data:
-  #rabbitmq_data:
+  redis-data:
 
 services:
   db:
@@ -14,14 +14,25 @@ services:
       POSTGRES_USER: root
       POSTGRES_DB: doglifedb
     volumes:
-      - pg_data:/var/lib/postgresql/data 
+      - pg_data:/var/lib/postgresql/data
     ports:
       - "5499:5432"
     networks:
-      - doglifebot_network 
+      - dogliveebot_network
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    restart: always
+    ports:
+      - "6399:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - dogliveebot_network
 
   #rabbitmq:
-  #  image: rabbitmq:managementls
+  #  image: rabbitmq:management
   #  container_name: rabbitmq
   #  restart: always
   #  environment:
@@ -33,7 +44,7 @@ services:
   #    - "15672:15672"
   #    - "5672:5672"
   #  networks:
-  #    - doglifebot_network 
+  #    - dogliveebot_network
 
 networks:
-  doglifebot_network:
+  dogliveebot_network:

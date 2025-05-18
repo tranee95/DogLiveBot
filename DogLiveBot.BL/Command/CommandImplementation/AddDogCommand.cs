@@ -17,6 +17,7 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
     private readonly ITelegramBotClient _botClient;
     private readonly IRepository<Dog> _dogRepository;
     private readonly ICommandService _commandService;
+    private readonly ICacheService _cacheService;
 
     public AddDogCommand(
         ILogger<AddDogCommand> logger,
@@ -24,13 +25,15 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         ITelegramBotClient botClient,
         IRepository<Dog> dogRepository,
         IRepository<UserCallbackQuery> userCallbackQueryRepository, 
-        ICommandService commandService)
+        ICommandService commandService, 
+        ICacheService cacheService)
         : base(mapper, botClient, userCallbackQueryRepository)
     {
         _logger = logger;
         _botClient = botClient;
         _dogRepository = dogRepository;
         _commandService = commandService;
+        _cacheService = cacheService;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.AddDog;
@@ -52,6 +55,9 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 
                 await _dogRepository.Add(dog, cancellationToken);
                 await SendMessage(message, $"{MessageText.AddDogSuccess}", cancellationToken);
+
+                var cacheKey = $"settings:{message.Chat.Id}";
+                await _cacheService.Remove(cacheKey, cancellationToken);
 
                 _logger.LogInformation($"Dog {dog.Name} was added for user {message.Chat.Id}");
             }

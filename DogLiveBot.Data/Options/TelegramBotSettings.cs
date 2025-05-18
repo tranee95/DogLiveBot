@@ -1,4 +1,4 @@
-namespace DogLiveBot.Core.Options;
+namespace DogLiveBot.Data.Options;
 
 /// <summary>
 /// Настройки для Telegram-бота.

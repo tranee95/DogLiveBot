@@ -97,7 +97,6 @@ public abstract class CallbackQueryCommand : ICommand
     {
         var userLastCallbackQuery = await _userCallbackQueryRepository.GetLast(
             s => s.UserTelegramId == callbackQuery.From.Id, cancellationToken);
-
         if (userLastCallbackQuery == null)
         {
             var userCallbackQuery = _mapper.Map<CallbackQuery, UserCallbackQuery>(callbackQuery);

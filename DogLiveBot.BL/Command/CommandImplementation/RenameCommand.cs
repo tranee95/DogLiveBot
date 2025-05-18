@@ -18,6 +18,7 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
     private readonly ITelegramBotClient _botClient;
     private readonly IRepository<User> _userRepository;
     private readonly ICommandService _commandService;
+    private readonly ICacheService _cacheService;
     
     public RenameCommand(
         IMapper mapper, 
@@ -25,13 +26,15 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         ILogger<RenameCommand> logger, 
         ITelegramBotClient botClient, 
         IRepository<User> userRepository, 
-        ICommandService commandService) 
+        ICommandService commandService, 
+        ICacheService cacheService) 
         : base(mapper, botClient, userCallbackQueryRepository)
     {
         _logger = logger;
         _botClient = botClient;
         _userRepository = userRepository;
         _commandService = commandService;
+        _cacheService = cacheService;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.Rename;
@@ -51,6 +54,9 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 
                     await _userRepository.Update(user, cancellationToken);
                     await SendMessage(message, MessageText.UserHasRename, cancellationToken);
+
+                    var cacheKey = $"settings:{message.Chat.Id}";
+                    await _cacheService.Remove(cacheKey, cancellationToken);
 
                     _logger.LogInformation($"User {user.FirstName} was renamed TelegramId: {message.Chat.Id}");
                 }

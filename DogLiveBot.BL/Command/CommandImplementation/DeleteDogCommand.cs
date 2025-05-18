@@ -19,6 +19,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
     private readonly IKeyboardService _keyboardService;
     private readonly IRepository<Dog> _dogRepository;
     private readonly ICommandService _commandService;
+    private readonly ICacheService _cacheService;
 
     public DeleteDogCommand(
         ILogger<DeleteDogCommand> logger,
@@ -27,7 +28,8 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         IRepository<UserCallbackQuery> userCallbackQueryRepository, 
         IKeyboardService keyboardService, 
         IRepository<Dog> dogRepository, 
-        ICommandService commandService) 
+        ICommandService commandService, 
+        ICacheService cacheService) 
         : base(mapper, botClient, userCallbackQueryRepository)
     {
         _logger = logger;
@@ -35,6 +37,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         _keyboardService = keyboardService;
         _dogRepository = dogRepository;
         _commandService = commandService;
+        _cacheService = cacheService;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.DeleteDog;
@@ -54,7 +57,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         await _botClient.SendMessage(message.Chat.Id, MessageText.ChooseDog,
             replyMarkup: _keyboardService.GetDeleteDogs(dogs), cancellationToken: cancellationToken);
     }
-    
+
     public async Task ExecuteReceivedDataLogic(Message message, CommandData commandData, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
     {
@@ -64,6 +67,9 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
             {
                 throw new NullReferenceException("Dog not found");
             }
+
+            var cacheKey = $"settings:{message.Chat.Id}";
+            await _cacheService.Remove(cacheKey, cancellationToken);
 
             await SendMessage(message, $"{MessageText.DeleteDogSuccess}", cancellationToken);
         } 
@@ -79,7 +85,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         }
         finally
         {
-            await GoBack(message, cancellationToken);
+            await GoBack(message, cancellationToken, callbackQuery);
         }
     }
 

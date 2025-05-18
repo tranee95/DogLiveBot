@@ -1,4 +1,4 @@
-namespace DogLiveBot.Core.Options;
+namespace DogLiveBot.Data.Options;
 
 /// <summary>
 /// Настройки приложения.
@@ -14,4 +14,9 @@ public class ApplicationOptions
     /// Настройки подключения к базе данных приложения.
     /// </summary>
     public ApplicationDbConnection ApplicationDbConnection { get; set; }
+    
+    /// <summary>
+    /// Настройки подключения redis
+    /// </summary>
+    public RedisSettings RedisSettings { get; set; }
 }

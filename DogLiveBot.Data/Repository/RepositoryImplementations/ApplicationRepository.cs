@@ -1,8 +1,9 @@
 using System.Linq.Expressions;
 using DogLiveBot.Data.Context;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace DogLiveBot.Data.Repository.RepositoryImplementations;
 
@@ -66,6 +67,21 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
             entity.CreateDate = DateTime.UtcNow;
 
             await context.Set<T>().AddAsync(entity, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task AddRange(T[] entitys, CancellationToken cancellationToken)
+    {
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            foreach (var entity in entitys)
+            {
+                entity.CreateDate = DateTime.UtcNow;
+            }
+
+            await context.Set<T>().AddRangeAsync(entitys, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -161,6 +177,23 @@ public class ApplicationRepository<T> : IRepository<T>, IAsyncDisposable where T
             return await query.OrderByDescending(s => s.CreateDate).LastOrDefaultAsync(filter, cancellationToken);
         }
     }
+
+    /// <inheritdoc/>
+    public async Task BatchUpdate(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateAction,
+        CancellationToken cancellationToken)
+    {
+        await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
+        {
+            await context.Set<T>()
+                .Where(filter)
+                .ExecuteUpdateAsync(updateAction, cancellationToken: cancellationToken);
+            
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
 
     private IQueryable<T> ApplyDeleteFilter(IQueryable<T> query, bool getDeleted)
     {

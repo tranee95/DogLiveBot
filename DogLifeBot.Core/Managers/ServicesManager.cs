@@ -1,23 +1,27 @@
-using DogLiveBot.BL.Command.CommandFactory;
-using DogLiveBot.BL.Command.CommandImplementation;
-using DogLiveBot.BL.Command.CommandInterface;
-using DogLiveBot.BL.Command.ReceivedDataCommandFactory;
-using DogLiveBot.BL.Command.ReceivedTextCommandFactory;
+using DogLiveBot.BL.Commands.CommandFactory;
+using DogLiveBot.BL.Commands.CommandImplementation;
+using DogLiveBot.BL.Commands.CommandInterface;
+using DogLiveBot.BL.Commands.ReceivedDataCommandFactory;
+using DogLiveBot.BL.Commands.ReceivedTextCommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
+using DogLiveBot.BL.Jobs;
 using DogLiveBot.BL.Services.ServiceImplementation;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Core.Managers.Extensions;
 using DogLiveBot.Data.Context;
-using DogLiveBot.Data.Options;
+using DogLiveBot.Data.Models.Options;
+using DogLiveBot.Data.Models.Quartz;
 using DogLiveBot.Data.Repository.RepositoryImplementations;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using Quartz;
 
 namespace DogLiveBot.Core.Managers;
 
@@ -37,6 +41,7 @@ public static class ServicesManager
             RegisterRedis(services);
             RegisterServices(services);
             RegisterCommands(services);
+            RegisterJobs(services);
         });
     }
 
@@ -58,10 +63,10 @@ public static class ServicesManager
     /// <param name="services">Коллекция сервисов для регистрации.</param>
     private static void RegisterDbContext(IServiceCollection services)
     {
-        services.AddDbContextFactory<ApplicationDbContext>((provider, contextOptionsBuilder) =>
+        var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
+        services.AddDbContextFactory<ApplicationDbContext>(contextOptionsBuilder =>
         {
-            var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
-            contextOptionsBuilder.UseNpgsql(options.ApplicationDbConnection.ConnectionString);
+            contextOptionsBuilder.UseNpgsql(settings.ApplicationDbConnection.ConnectionString);
         });
         services.AddScoped(typeof(IRepository<>), typeof(ApplicationRepository<>));
     }
@@ -72,11 +77,8 @@ public static class ServicesManager
     /// <param name="services">Коллекция сервисов для регистрации.</param>
     private static void RegisterTelegramBotClient(IServiceCollection services)
     {
-        services.AddSingleton<ITelegramBotClient>(provider =>
-        {
-            var options = provider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
-            return new TelegramBotClient(options.TelegramBotSettings.Token);
-        });
+        var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
+        services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(settings.TelegramBotSettings.Token));
         services.AddScoped<ITelegramBotService, TelegramBotService>();
     }
 
@@ -94,6 +96,45 @@ public static class ServicesManager
     }
 
     /// <summary>
+    /// Метод для регистрации заданий (Jobs) с использованием Quartz в контейнере службы.
+    /// Извлекает настройки приложения из конфигурации, включая крон-выражения,
+    /// и добавляет задание <see cref="FillingCalendarDataJob"/> с заданной конфигурацией.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для внедрения зависимостей.</param>
+    private static void RegisterJobs(IServiceCollection services)
+    {
+        // Извлечение настроек приложения
+        var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
+
+        // Регистрация заданий через Quartz
+        services.AddQuartz(q =>
+        {
+            // Добавление задачи на основе настроек крон выражений
+            AddJob<FillingCalendarDataJob>(q, new JobConfiguration(nameof(settings.CronExpressionSettings), 
+                settings.CronExpressionSettings.StartFillingCalendarData));
+        });
+
+        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+    }
+
+    /// <summary>
+    /// Добавление задачи на исполнение
+    /// </summary>
+    /// <param name="configurator">Конфигуратор</param>
+    /// <param name="jobConfiguration">Конфигурация задачи</param>
+    /// <typeparam name="T">Задача</typeparam>
+    private static void AddJob<T>(IServiceCollectionQuartzConfigurator configurator,
+        JobConfiguration jobConfiguration) where T : IJob
+    {
+        configurator.AddJob<T>(options => options.WithIdentity(jobConfiguration.JobKeyName));
+        configurator.AddTrigger(options => options
+            .ForJob(jobConfiguration.Key)
+            .WithIdentity(jobConfiguration.TriggerName)
+            .WithCronSchedule(jobConfiguration.CronExpression)
+        );
+    }
+
+    /// <summary>
     /// Регистрирует дополнительные сервисы в контейнере зависимостей.
     /// </summary>
     /// <param name="services">Коллекция сервисов для регистрации.</param>
@@ -103,6 +144,7 @@ public static class ServicesManager
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IKeyboardService, KeyboardService>();
         services.AddScoped<ICommandService, CommandService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
 
         services.AddScoped<IMessageHandlerFactory, MessageHandlerFactory>();
 

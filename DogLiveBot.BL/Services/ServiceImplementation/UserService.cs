@@ -1,5 +1,5 @@
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 
 namespace DogLiveBot.BL.Services.ServiceImplementation;

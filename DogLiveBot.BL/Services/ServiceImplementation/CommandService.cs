@@ -1,6 +1,6 @@
-using DogLiveBot.BL.Command.CommandFactory;
+using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Enums.Helpers;
@@ -34,7 +34,7 @@ public class CommandService : ICommandService
 
         if (userCallbackQuery == null)
         {
-            throw new NullReferenceException("Back Command is null");
+            throw new NullReferenceException("Back Commands is null");
         }
 
         var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);

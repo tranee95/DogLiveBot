@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace DogLiveBot.Data.Repository.RepositoryInterfaces;
 
@@ -55,6 +56,13 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <param name="entity">Сущность для добавления.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     Task Add(T entity, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Добавляет массив сущностей в репозиторий.
+    /// </summary>
+    /// <param name="entitys">Сущности для добавления.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
+    Task AddRange(T[] entitys, CancellationToken cancellationToken);
 
     /// <summary>
     /// Обновляет существующую сущность в репозитории.
@@ -122,4 +130,16 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true);
+
+    /// <summary>
+    /// Выполняет пакетное обновление сущностей в базе данных на основе указанного фильтра и действий обновления.
+    /// </summary>
+    /// <param name="filter">Фильтр, определяющий, какие сущности должны быть обновлены.</param>
+    /// <param name="updateAction">Действия обновления, определяющие, какие свойства и как нужно изменить.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
+    /// <typeparam name="T">Тип сущности, над которой выполняется обновление.</typeparam>
+    Task BatchUpdate(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> updateAction,
+        CancellationToken cancellationToken);
 }

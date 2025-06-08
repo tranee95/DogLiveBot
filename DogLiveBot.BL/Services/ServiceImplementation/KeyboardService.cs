@@ -1,9 +1,8 @@
-using System.IO.Compression;
 using System.Text;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Extensions;
-using DogLiveBot.Data.Model;
+using DogLiveBot.Data.Models;
 using DogLiveBot.Data.Text;
 using Newtonsoft.Json;
 using Telegram.Bot.Types.ReplyMarkups;

@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 
 namespace DogLiveBot.Data.Repository.RepositoryInterfaces;
 
@@ -55,6 +55,13 @@ public interface IRepository<T> : IDisposable where T : BaseEntity<Guid>
     /// <param name="entity">Сущность для добавления.</param>
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     Task Add(T entity, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Добавляет массив сущностей в репозиторий.
+    /// </summary>
+    /// <param name="entitys">Сущности для добавления.</param>
+    /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
+    Task AddRange(T[] entitys, CancellationToken cancellationToken);
 
     /// <summary>
     /// Обновляет существующую сущность в репозитории.

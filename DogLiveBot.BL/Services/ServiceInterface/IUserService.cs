@@ -1,4 +1,4 @@
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 
 namespace DogLiveBot.BL.Services.ServiceInterface;
 

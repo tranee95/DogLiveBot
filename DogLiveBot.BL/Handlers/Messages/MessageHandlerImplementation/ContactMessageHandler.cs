@@ -1,4 +1,4 @@
-using DogLiveBot.BL.Command.CommandFactory;
+using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.Data.Enums;
 using Microsoft.Extensions.Logging;

@@ -1,11 +1,11 @@
-using DogLiveBot.BL.Command.CommandFactory;
-using DogLiveBot.BL.Command.ReceivedDataCommandFactory;
-using DogLiveBot.BL.Command.ReceivedTextCommandFactory;
+using DogLiveBot.BL.Commands.CommandFactory;
+using DogLiveBot.BL.Commands.ReceivedDataCommandFactory;
+using DogLiveBot.BL.Commands.ReceivedTextCommandFactory;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
-using DogLiveBot.Data.Entity;
+using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Helpers;
-using DogLiveBot.Data.Model;
+using DogLiveBot.Data.Models;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

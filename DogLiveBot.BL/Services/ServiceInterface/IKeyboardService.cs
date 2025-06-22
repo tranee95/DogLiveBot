@@ -9,4 +9,5 @@ public interface IKeyboardService
     public InlineKeyboardMarkup GetMainMenu();
     public InlineKeyboardMarkup GetSettings();
     public InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDeleteModel> models);
+    public InlineKeyboardMarkup GetDays(ICollection<DaysModel> days);
 }

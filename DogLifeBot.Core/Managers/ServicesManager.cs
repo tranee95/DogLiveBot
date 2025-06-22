@@ -180,5 +180,6 @@ public static class ServicesManager
 
         services.AddScoped<IReceivedDataCommandFactory, ReceivedDataCommandFactory>();
         services.AddScoped<IReceivedDataCommand, DeleteDogCommand>();
+        services.AddScoped<IReceivedDataCommand, SignUpForClassCommand>();
     }
 }

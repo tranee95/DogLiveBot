@@ -33,6 +33,8 @@ public static class MessageText
     public static readonly string RenameUserError  = "Ошибка при изменении имени";
     public static readonly string SetUserName = "Укажите имя";
 
+    public static readonly string ChooseDay = "Выберете день недели";
+    
     public static readonly string ChooseDog = "Выберете собаку";
 
     public static readonly string AddDogSuccess = "Вы успешно добавили собаку в свой профиль";

@@ -84,15 +84,25 @@ public class KeyboardService : IKeyboardService
         foreach (var item in dogsModel)
         {
             var jsonData = JsonConvert.SerializeObject(new { Id = item.Id, CommandType = item.CommandType });
-
-            if (Encoding.UTF8.GetByteCount(jsonData) > maxByteCount)
-            {
-                throw new Exception("Data size is too big");
-            }
-
             menu.Add(new []
             {
                 InlineKeyboardButton.WithCallbackData(item.Name, jsonData),
+            });
+        }
+
+        return new InlineKeyboardMarkup(menu);
+    }
+
+    public InlineKeyboardMarkup GetDays(ICollection<DaysModel> days)
+    {
+        var menu = new List<InlineKeyboardButton[]>();
+
+        foreach (var item in days)
+        {
+            var jsonData = JsonConvert.SerializeObject(new { DayOfWeek = item.DayOfWeek, CommandType = item.CommandType });
+            menu.Add(new []
+            {
+                InlineKeyboardButton.WithCallbackData(item.Text, jsonData),
             });
         }
 

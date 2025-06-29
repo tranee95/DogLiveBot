@@ -1,8 +1,6 @@
 using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.Data.Context.Entity;
-using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Enums.Helpers;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
@@ -13,16 +11,16 @@ namespace DogLiveBot.BL.Services.ServiceImplementation;
 public class CommandService : ICommandService
 {
     private readonly ITelegramBotClient _botClient;
-    private readonly IRepository<UserCallbackQuery> _userCallbackQueryRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
     private readonly ICommandFactory _commandFactory;
 
     public CommandService(
         ITelegramBotClient botClient,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository,
+        IReadOnlyRepository readOnlyRepository,
         ICommandFactory commandFactory)
     {
         _botClient = botClient;
-        _userCallbackQueryRepository = userCallbackQueryRepository;
+        _readOnlyRepository = readOnlyRepository;
         _commandFactory = commandFactory;
     }
 
@@ -30,7 +28,9 @@ public class CommandService : ICommandService
     public async Task ExecuteGoBackCommand(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
     {
-        var userCallbackQuery = await _userCallbackQueryRepository.GetFirstOrDefault(s => s.UserTelegramId == message.Chat.Id, cancellationToken);
+        var userCallbackQuery = await _readOnlyRepository.GetFirstOrDefault<UserCallbackQuery>(
+            filter: s => s.UserTelegramId == message.Chat.Id,
+            cancellationToken: cancellationToken);
 
         if (userCallbackQuery == null)
         {

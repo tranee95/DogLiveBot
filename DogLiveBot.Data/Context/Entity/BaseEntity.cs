@@ -15,16 +15,19 @@ namespace DogLiveBot.Data.Context.Entity
         /// <summary>
         /// Время создания сущности.
         /// </summary>
+        [Column(TypeName = "timestamp without time zone")]
         public DateTime CreateDate { get; set; }
 
         /// <summary>
         /// Время последнего изменения сущности.
         /// </summary>
+        [Column(TypeName = "timestamp without time zone")]
         public DateTime? ModifiedDate { get; set; }
 
         /// <summary>
         /// Время удаления сущности (если применимо).
         /// </summary>
+        [Column(TypeName = "timestamp without time zone")]
         public DateTime? DeleteDate { get; set; }
     }
 }

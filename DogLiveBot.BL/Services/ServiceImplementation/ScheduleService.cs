@@ -14,23 +14,20 @@ namespace DogLiveBot.BL.Services.ServiceImplementation;
 public class ScheduleService : IScheduleService
 {
     private readonly ILogger<TelegramBotService> _logger;
-    private readonly ApplicationDbContext _context;
-    private readonly IRepository<Schedule> _scheduleRepository;
-    private readonly IRepository<AvailableSlot> _availableSlotRepository;
     private readonly IOptions<ApplicationOptions> _options;
+    private readonly IChangeRepository _changeRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
 
     public ScheduleService(
         ILogger<TelegramBotService> logger,
-        IRepository<Schedule> scheduleRepository,
-        IRepository<AvailableSlot> availableSlotRepository,
         IOptions<ApplicationOptions> options, 
-        ApplicationDbContext context)
+        IChangeRepository changeRepository, 
+        IReadOnlyRepository readOnlyRepository)
     {
         _logger = logger;
-        _context = context;
-        _scheduleRepository = scheduleRepository;
-        _availableSlotRepository = availableSlotRepository;
         _options = options;
+        _changeRepository = changeRepository;
+        _readOnlyRepository = readOnlyRepository;
     }
 
     /// <summary>
@@ -54,10 +51,10 @@ public class ScheduleService : IScheduleService
     /// <returns>True, если активное расписание существует, иначе false.</returns>
     private async Task<bool> HasActiveSchedule(CancellationToken cancellationToken)
     {
-        return await _scheduleRepository.IfExists(
-            filter: s => DateTime.Now.ToUniversalTime() >= s.WeekStartDate.ToUniversalTime() &&
-                         DateTime.Now.ToUniversalTime() <= s.WeekEndDate.ToUniversalTime() && 
-                         s.IsActiveWeek == true,
+        var now = DateTime.Now;
+
+        return await _readOnlyRepository.IfExists<Schedule>(
+            filter: s => now >= s.WeekStartDate && now <= s.WeekEndDate && s.IsActiveWeek,
             cancellationToken: cancellationToken);
     }
 
@@ -67,15 +64,19 @@ public class ScheduleService : IScheduleService
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task CreateNewSchedule(CancellationToken cancellationToken)
     {
-        await using (var tr = await _context.Database.BeginTransactionAsync(cancellationToken))
+        await using (var tr = await _changeRepository.CreateTransaction(cancellationToken))
         {
             try
             {
                 await DeactivatingActiveSchedules(cancellationToken);
-                var schedule = new Schedule(GetStartOfWeek(DateTime.Now), GetEndOfWeek(DateTime.Now), true);
+                
+                var schedule = new Schedule(GetStartOfWeek(DateTime.Today), GetEndOfWeek(DateTime.Today), true);
+                await _changeRepository.Add<Schedule>(schedule, tr, cancellationToken);
 
-                await _scheduleRepository.Add(schedule, cancellationToken);
-                await _availableSlotRepository.AddRange(CreateAvailableSlot(schedule.Id), cancellationToken);
+                var availableSlot = CreateAvailableSlot(schedule.Id);
+                await _changeRepository.AddRange<AvailableSlot>(availableSlot, tr, cancellationToken);
+
+                await tr.CommitAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -99,17 +100,7 @@ public class ScheduleService : IScheduleService
     {
         for (var time = startTime; time < endTime; time = time.Add(interval))
         {
-            var result = new AvailableSlot
-            {
-                ScheduleId = scheduleId,
-                DayOfWeek = dayOfWeek,
-                Date = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day + (int)dayOfWeek).ToUniversalTime(),
-                StartTime = time,
-                EndTime = time.Add(interval),
-                IsAvailable = true
-            };;
-
-            yield return result;
+            yield return new AvailableSlot(scheduleId, dayOfWeek, time, interval);;
         }
     }
 
@@ -134,7 +125,7 @@ public class ScheduleService : IScheduleService
     /// <param name="cancellationToken">Токен отмены для асинхронной операции.</param>
     private async Task DeactivatingActiveSchedules(CancellationToken cancellationToken)
     {
-        await _scheduleRepository.BatchUpdate(
+        await _changeRepository.BatchUpdate<Schedule>(
             filter: s => s.IsActiveWeek,
             updateAction: props => props.SetProperty(s => s.IsActiveWeek, false),
             cancellationToken: cancellationToken);
@@ -148,7 +139,7 @@ public class ScheduleService : IScheduleService
     private DateTime GetStartOfWeek(DateTime date)
     {
         var diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
-        return date.AddDays(-diff).Date.ToUniversalTime();
+        return date.AddDays(-diff).Date;
     }
 
     /// <summary>
@@ -158,6 +149,6 @@ public class ScheduleService : IScheduleService
     /// <returns>Дата конца недели (воскресенье).</returns>
     private DateTime GetEndOfWeek(DateTime date)
     {
-        return GetStartOfWeek(date).AddDays(6).ToUniversalTime();
+        return GetStartOfWeek(date).AddDays(6).AddDays(1).AddSeconds(-1);
     }
 }

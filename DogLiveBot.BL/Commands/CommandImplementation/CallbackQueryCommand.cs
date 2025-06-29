@@ -1,4 +1,5 @@
 using AutoMapper;
+using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
@@ -6,6 +7,7 @@ using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using User = DogLiveBot.Data.Context.Entity.User;
 
 namespace DogLiveBot.BL.Commands.CommandImplementation;
 
@@ -26,16 +28,19 @@ public abstract class CallbackQueryCommand : ICommand
 
     private readonly IMapper _mapper;
     private readonly ITelegramBotClient _botClient;
-    private readonly IRepository<UserCallbackQuery> _userCallbackQueryRepository;
+    private readonly IChangeRepository _changeRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
 
     protected CallbackQueryCommand(
         IMapper mapper,
         ITelegramBotClient telegramBotClient,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository)
+        IChangeRepository changeRepository, 
+        IReadOnlyRepository readOnlyRepository)
     {
         _mapper = mapper;
         _botClient = telegramBotClient;
-        _userCallbackQueryRepository = userCallbackQueryRepository;
+        _changeRepository = changeRepository;
+        _readOnlyRepository = readOnlyRepository;
     }
 
     /// <summary>
@@ -95,18 +100,20 @@ public abstract class CallbackQueryCommand : ICommand
     /// <param name="cancellationToken">Токен отмены.</param>
     private async Task CreateOrUpdateUserCallbackQuery(CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
-        var userLastCallbackQuery = await _userCallbackQueryRepository.GetLast(
-            s => s.UserTelegramId == callbackQuery.From.Id, cancellationToken);
+        var userLastCallbackQuery = await _readOnlyRepository.GetLast<UserCallbackQuery>(
+            filter: s => s.UserTelegramId == callbackQuery.From.Id,
+            cancellationToken: cancellationToken);
+
         if (userLastCallbackQuery == null)
         {
             var userCallbackQuery = _mapper.Map<CallbackQuery, UserCallbackQuery>(callbackQuery);
-            await _userCallbackQueryRepository.Add(userCallbackQuery, cancellationToken);
+            await _changeRepository.Add<UserCallbackQuery>(userCallbackQuery, cancellationToken);
         }
         else
         {
             userLastCallbackQuery.CallbackQueryId = callbackQuery.Id;
             userLastCallbackQuery.Data = CommandType.GetDescription();
-            await _userCallbackQueryRepository.Update(userLastCallbackQuery, cancellationToken);
+            await _changeRepository.Update<UserCallbackQuery>(userLastCallbackQuery, cancellationToken);
         }
     }
 }

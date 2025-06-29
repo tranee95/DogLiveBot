@@ -13,6 +13,9 @@ namespace DogLiveBot.Data.Context.Configuration
             builder.HasOne(s => s.Schedule)
                 .WithMany(s => s.AvailableSlots)
                 .HasForeignKey(s => s.ScheduleId);
+
+            builder.Property(s => s.Date)
+                .HasColumnType("timestamp without time zone");
         }
     }
 }

@@ -1,7 +1,6 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
@@ -18,9 +17,10 @@ public class MenuCommand : CallbackQueryCommand, ICommand
     public MenuCommand(
         IMapper mapper,
         ITelegramBotClient botClient,
-        IRepository<UserCallbackQuery?> userCallbackQueryRepository,
+        IChangeRepository changeRepository,
+        IReadOnlyRepository readOnlyRepository,
         IKeyboardService keyboardService) 
-        : base(mapper, botClient, userCallbackQueryRepository)
+        : base(mapper, botClient, changeRepository, readOnlyRepository)
     {
         _keyboardService = keyboardService;
         _botClient = botClient;

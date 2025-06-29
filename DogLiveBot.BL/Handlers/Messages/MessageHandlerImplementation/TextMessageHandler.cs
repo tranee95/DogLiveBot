@@ -20,20 +20,20 @@ public class TextMessageHandler : IMessageHandler
     private readonly ICommandFactory _commandFactory;
     private readonly IReceivedTextCommandFactory _receivedTextCommandFactory;
     private readonly IReceivedDataCommandFactory _receivedDataCommandFactory;
-    private readonly IRepository<UserCallbackQuery> _userCallbackQueryRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
 
     public TextMessageHandler(
         ILogger<TextMessageHandler> logger,
         ICommandFactory commandFactory, 
         IReceivedTextCommandFactory receivedTextCommandFactory,
         IReceivedDataCommandFactory receivedDataCommandFactory,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository)
+        IReadOnlyRepository readOnlyRepository)
     {
         _logger = logger;
         _commandFactory = commandFactory;
         _receivedTextCommandFactory = receivedTextCommandFactory;
         _receivedDataCommandFactory = receivedDataCommandFactory;
-        _userCallbackQueryRepository = userCallbackQueryRepository;
+        _readOnlyRepository = readOnlyRepository;
     }
 
     public MessageType MessageType => MessageType.Text;
@@ -96,8 +96,10 @@ public class TextMessageHandler : IMessageHandler
     /// <param name="cancellationToken">Токен отмены.</param>
     private async Task HandleReceivedText(Message message, CancellationToken cancellationToken)
     {
-        var userCallbackQuery = await _userCallbackQueryRepository.GetFirstOrDefault(
-            s => s.UserTelegramId == message.Chat.Id, cancellationToken);
+        var userCallbackQuery = await _readOnlyRepository.GetFirstOrDefault<UserCallbackQuery>(
+           filter: s => s.UserTelegramId == message.Chat.Id,
+           cancellationToken: cancellationToken);
+        
         if (userCallbackQuery != null)
         {
             var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
@@ -128,7 +130,7 @@ public class TextMessageHandler : IMessageHandler
     /// <param name="json">JSON-строка для десериализации.</param>
     /// <param name="result">Результат десериализации, если она прошла успешно.</param>
     /// <returns>True, если десериализация прошла успешно, иначе False.</returns>
-    public static bool TryParseFromJsonToObject<T>(string json, out T result)
+    private static bool TryParseFromJsonToObject<T>(string json, out T result)
     {
         try
         {

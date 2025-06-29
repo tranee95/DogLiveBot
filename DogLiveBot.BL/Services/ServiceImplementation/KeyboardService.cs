@@ -78,7 +78,6 @@ public class KeyboardService : IKeyboardService
 
     public InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDeleteModel> dogsModel)
     {
-        const int maxByteCount = 64;
         var menu = new List<InlineKeyboardButton[]>();
 
         foreach (var item in dogsModel)

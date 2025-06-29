@@ -7,11 +7,26 @@ namespace DogLiveBot.Data.Context.Entity
     /// </summary>
     public class AvailableSlot : BaseEntity<Guid>
     {
+        public AvailableSlot()
+        {
+        }
+
+        public AvailableSlot(Guid scheduleId, DayOfWeek dayOfWeek, TimeSpan time, TimeSpan interval, 
+            bool isAvailable = true)
+        {
+            ScheduleId = scheduleId;
+            DayOfWeek = dayOfWeek;
+            Date = DateTime.Now.AddDays((int)dayOfWeek);
+            StartTime = time;
+            EndTime = time.Add(interval);
+            IsAvailable = isAvailable;
+        }
+
         /// <summary>
         /// Идентификатор связанного расписания.
         /// </summary>
         public Guid ScheduleId { get; set; }
-        
+
         /// <summary>
         /// Дата занятия
         /// </summary>

@@ -1,7 +1,6 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
@@ -16,25 +15,27 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 {
     private readonly ILogger<RenameCommand> _logger;
     private readonly ITelegramBotClient _botClient;
-    private readonly IRepository<User> _userRepository;
+    private readonly IChangeRepository _changeRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
     
     public RenameCommand(
         IMapper mapper, 
-        IRepository<UserCallbackQuery> userCallbackQueryRepository,
         ILogger<RenameCommand> logger, 
         ITelegramBotClient botClient, 
-        IRepository<User> userRepository, 
+        IReadOnlyRepository readOnlyRepository,
+        IChangeRepository changeRepository,
         ICommandService commandService, 
         ICacheService cacheService) 
-        : base(mapper, botClient, userCallbackQueryRepository)
+        : base(mapper, botClient, changeRepository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
-        _userRepository = userRepository;
+        _readOnlyRepository = readOnlyRepository;
         _commandService = commandService;
         _cacheService = cacheService;
+        _changeRepository = changeRepository;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.Rename;
@@ -47,12 +48,15 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         {
             if (!string.IsNullOrWhiteSpace(message.Text))
             {
-                var user = await _userRepository.GetFirstOrDefault(s => s.TelegramId == message.Chat.Id, cancellationToken);
+                var user = await _readOnlyRepository.GetFirstOrDefault<User>(
+                    filter: s => s.TelegramId == message.Chat.Id, 
+                    cancellationToken: cancellationToken);
+                
                 if (user != null)
                 {
                     user.FirstName = message.Text.Trim();
 
-                    await _userRepository.Update(user, cancellationToken);
+                    await _changeRepository.Update<User>(user, cancellationToken);
                     await SendMessage(message, MessageText.UserHasRename, cancellationToken);
 
                     var cacheKey = $"settings:{message.Chat.Id}";

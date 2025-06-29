@@ -16,7 +16,6 @@ using DogLiveBot.Data.Models.Quartz;
 using DogLiveBot.Data.Repository.RepositoryImplementations;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -68,7 +67,8 @@ public static class ServicesManager
         {
             contextOptionsBuilder.UseNpgsql(settings.ApplicationDbConnection.ConnectionString);
         });
-        services.AddScoped(typeof(IRepository<>), typeof(ApplicationRepository<>));
+        services.AddScoped<IReadOnlyRepository, ApplicationReadOnlyRepository>();
+        services.AddScoped<IChangeRepository, ApplicationChangeRepository>();
     }
 
     /// <summary>
@@ -103,13 +103,10 @@ public static class ServicesManager
     /// <param name="services">Коллекция сервисов для внедрения зависимостей.</param>
     private static void RegisterJobs(IServiceCollection services)
     {
-        // Извлечение настроек приложения
         var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
-
-        // Регистрация заданий через Quartz
+        
         services.AddQuartz(q =>
         {
-            // Добавление задачи на основе настроек крон выражений
             AddJob<FillingCalendarDataJob>(q, new JobConfiguration(nameof(settings.CronExpressionSettings), 
                 settings.CronExpressionSettings.StartFillingCalendarData));
         });

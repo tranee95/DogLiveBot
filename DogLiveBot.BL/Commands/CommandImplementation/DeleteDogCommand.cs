@@ -17,7 +17,8 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
     private readonly ILogger<DeleteDogCommand> _logger;
     private readonly ITelegramBotClient _botClient;
     private readonly IKeyboardService _keyboardService;
-    private readonly IRepository<Dog> _dogRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
+    private readonly IChangeRepository _changeRepository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
 
@@ -25,17 +26,18 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         ILogger<DeleteDogCommand> logger,
         IMapper mapper, 
         ITelegramBotClient botClient, 
-        IRepository<UserCallbackQuery> userCallbackQueryRepository, 
+        IChangeRepository changeRepository,
+        IReadOnlyRepository readOnlyRepository, 
         IKeyboardService keyboardService, 
-        IRepository<Dog> dogRepository, 
         ICommandService commandService, 
         ICacheService cacheService) 
-        : base(mapper, botClient, userCallbackQueryRepository)
+        : base(mapper, botClient, changeRepository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
+        _changeRepository = changeRepository;
         _keyboardService = keyboardService;
-        _dogRepository = dogRepository;
+        _readOnlyRepository = readOnlyRepository;
         _commandService = commandService;
         _cacheService = cacheService;
     }
@@ -45,7 +47,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
 
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {
-        var dogs = await _dogRepository.WhereSelected<DogDeleteModel>(
+        var dogs = await _readOnlyRepository.WhereSelected<Dog, DogDeleteModel>(
             filter: s => s.UserTelegramId == message.Chat.Id,
             selector: s => new DogDeleteModel()
             {
@@ -63,7 +65,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
     {
         try
         {
-            if (!await _dogRepository.Delete(commandData.Id, cancellationToken))
+            if (!await _changeRepository.Delete<Dog>(commandData.Id, cancellationToken))
             {
                 throw new NullReferenceException("Dog not found");
             }

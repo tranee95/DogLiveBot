@@ -6,23 +6,30 @@ namespace DogLiveBot.BL.Services.ServiceImplementation;
 
 public class UserService : IUserService
 {
-    private readonly IRepository<User> _userRepository;
+    private readonly IChangeRepository _changeRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
 
-    public UserService(IRepository<User> userRepository)
+    public UserService(
+        IReadOnlyRepository readOnlyRepository, 
+        IChangeRepository changeRepository)
     {
-        _userRepository = userRepository;
+        _readOnlyRepository = readOnlyRepository;
+        _changeRepository = changeRepository;
     }
     
     /// <inheritdoc />
     public async Task<bool> CreateIfNotExistAsync(User user, CancellationToken cancellationToken)
     {
-        var ifExist = await _userRepository.IfExists(s => s.PhoneNumber == user.PhoneNumber, cancellationToken);
+        var ifExist = await _readOnlyRepository.IfExists<User>(
+            filter: s => s.PhoneNumber == user.PhoneNumber, 
+            cancellationToken: cancellationToken);
+
         if (ifExist)
         {
             return false;
         }
 
-        await _userRepository.Add(user, cancellationToken);
+        await _changeRepository.Add(user, cancellationToken);
         return true;
     }
 }

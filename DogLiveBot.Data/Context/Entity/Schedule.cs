@@ -11,11 +11,11 @@ namespace DogLiveBot.Data.Context.Entity
         {
         }
         
-        public Schedule(DateTime WeekStartDate, DateTime WeekEndDate, bool IsActiveWeek)
+        public Schedule(DateTime weekStartDate, DateTime weekEndDate, bool isActiveWeek)
         {
-            this.WeekStartDate = WeekStartDate;
-            this.WeekEndDate = WeekEndDate;
-            this.IsActiveWeek = IsActiveWeek;
+            WeekStartDate = weekStartDate;
+            WeekEndDate = weekEndDate;
+            IsActiveWeek = isActiveWeek;
         }
 
         /// <summary>

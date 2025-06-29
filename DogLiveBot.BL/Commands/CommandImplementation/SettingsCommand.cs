@@ -1,11 +1,11 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Models;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using Quartz.Util;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using User = DogLiveBot.Data.Context.Entity.User;
@@ -16,20 +16,20 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
 {
     private readonly IKeyboardService _keyboardService;
     private readonly ITelegramBotClient _botClient;
-    private readonly IRepository<User> _userRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
     private readonly ICacheService _cacheService;
 
     public SettingsCommand(
         IMapper mapper,
         ITelegramBotClient botClient,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository,
+        IChangeRepository changeRepository,
+        IReadOnlyRepository readOnlyRepository,
         IKeyboardService keyboardService, 
-        IRepository<User> userRepository, 
         ICacheService cacheService) 
-        : base(mapper, botClient, userCallbackQueryRepository)
+        : base(mapper, botClient, changeRepository, readOnlyRepository)
     {
         _keyboardService = keyboardService;
-        _userRepository = userRepository;
+        _readOnlyRepository = readOnlyRepository;
         _cacheService = cacheService;
         _botClient = botClient;
     }
@@ -51,12 +51,12 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
         var cacheKey = $"settings:{message.Chat.Id}";
         var cacheValue = await _cacheService.Get(cacheKey, cancellationToken);
 
-        if (cacheValue != null)
+        if (!cacheValue.IsNullOrWhiteSpace())
         {
             return cacheValue;
         }
-
-        var settingsMessageText = await _userRepository.GetFirstOrDefaultSelected<SettingsMessageTextModel>(
+        
+        var settingsMessageText = await _readOnlyRepository.GetFirstOrDefaultSelected<User, SettingsMessageTextModel>(
             filter: s => s.TelegramId == message.Chat.Id,
             selector: s => new SettingsMessageTextModel
             {

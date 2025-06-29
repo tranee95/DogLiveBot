@@ -5,6 +5,16 @@ namespace DogLiveBot.Data.Context.Entity
     /// </summary>
     public class Dog : BaseEntity<Guid>
     {
+        public Dog()
+        {
+        }
+
+        public Dog(string text, long Id)
+        {
+            Name = text.Trim();
+            UserTelegramId = Id;
+        }
+
         /// <summary>
         /// Идентификатор пользователя в Telegram.
         /// </summary>

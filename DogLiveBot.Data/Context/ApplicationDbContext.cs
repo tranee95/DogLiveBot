@@ -28,6 +28,8 @@ namespace DogLiveBot.Data.Context
             modelBuilder.ApplyConfiguration(new UserCallbackQueryConfiguration());
             modelBuilder.ApplyConfiguration(new AvailableSlotConfiguration());
             modelBuilder.ApplyConfiguration(new BookingConfiguration());
+            modelBuilder.ApplyConfiguration(new ScheduleConfiguration());
+            modelBuilder.ApplyConfiguration(new EventConfiguration());
         }
     }
 }

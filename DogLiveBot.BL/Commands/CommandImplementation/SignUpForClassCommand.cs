@@ -18,22 +18,22 @@ public class SignUpForClassCommand : CallbackQueryCommand, ICommand, IReceivedDa
     private readonly ILogger<DeleteDogCommand> _logger;
     private readonly ITelegramBotClient _botClient;
     private readonly IKeyboardService _keyboardService;
-    private readonly IRepository<Schedule> _scheduleRepository;
+    private readonly IReadOnlyRepository _readOnlyRepository;
 
     public SignUpForClassCommand(
         IMapper mapper,
         ITelegramBotClient telegramBotClient,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository,
+        IChangeRepository changeRepository,
+        IReadOnlyRepository readOnlyRepository,
         ILogger<DeleteDogCommand> logger,
         ITelegramBotClient botClient,
-        IKeyboardService keyboardService,
-        IRepository<Schedule> scheduleRepository)
-        : base(mapper, telegramBotClient, userCallbackQueryRepository)
+        IKeyboardService keyboardService)
+        : base(mapper, telegramBotClient, changeRepository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
         _keyboardService = keyboardService;
-        _scheduleRepository = scheduleRepository;
+        _readOnlyRepository = readOnlyRepository;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.SignUpForClass;
@@ -42,8 +42,11 @@ public class SignUpForClassCommand : CallbackQueryCommand, ICommand, IReceivedDa
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery)
     {
-        var activeSchedule = await _scheduleRepository.GetFirstOrDefault(s => s.IsActiveWeek, cancellationToken);
+        var activeSchedule = await _readOnlyRepository.GetFirstOrDefault<Schedule>(
+            filter: s => s.IsActiveWeek,
+            cancellationToken: cancellationToken);
 
+        //TODO: Перенести в ScheduleService
         var days = new List<DaysModel>();
         for (var date = activeSchedule.WeekStartDate; date <= activeSchedule.WeekEndDate; date = date.AddDays(1))
         {

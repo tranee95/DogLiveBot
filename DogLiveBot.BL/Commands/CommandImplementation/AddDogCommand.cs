@@ -15,7 +15,7 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 {
     private readonly ILogger<AddDogCommand> _logger;
     private readonly ITelegramBotClient _botClient;
-    private readonly IRepository<Dog> _dogRepository;
+    private readonly IChangeRepository _changeRepository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
 
@@ -23,15 +23,15 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         ILogger<AddDogCommand> logger,
         IMapper mapper,
         ITelegramBotClient botClient,
-        IRepository<Dog> dogRepository,
-        IRepository<UserCallbackQuery> userCallbackQueryRepository, 
+        IChangeRepository changeRepository,
+        IReadOnlyRepository readOnlyRepository, 
         ICommandService commandService, 
         ICacheService cacheService)
-        : base(mapper, botClient, userCallbackQueryRepository)
+        : base(mapper, botClient, changeRepository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
-        _dogRepository = dogRepository;
+        _changeRepository = changeRepository;
         _commandService = commandService;
         _cacheService = cacheService;
     }
@@ -47,13 +47,9 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         {
             if (!string.IsNullOrWhiteSpace(message.Text))
             {
-                var dog = new Dog
-                {
-                    Name = message.Text.Trim(),
-                    UserTelegramId = message.Chat.Id,
-                };
+                var dog = new Dog(message.Text, message.Chat.Id);
 
-                await _dogRepository.Add(dog, cancellationToken);
+                await _changeRepository.Add<Dog>(dog, cancellationToken);
                 await SendMessage(message, $"{MessageText.AddDogSuccess}", cancellationToken);
 
                 var cacheKey = $"settings:{message.Chat.Id}";

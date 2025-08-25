@@ -1,8 +1,10 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
+using DogLiveBot.BL.Services.ServiceInterface.User;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
+using DogLiveBot.Data.Text;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;

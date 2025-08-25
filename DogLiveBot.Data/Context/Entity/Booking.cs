@@ -7,17 +7,36 @@ namespace DogLiveBot.Data.Context.Entity
     /// Содержит информацию о событии, пользователе, времени бронирования 
     /// и текущем статусе бронирования.
     /// </summary>
-    public class Booking : BaseEntity<Guid>
+    public class Booking : BaseEntity<int>
     {
-        /// <summary>
-        /// Идентификатор связанного события.
-        /// </summary>
-        public Guid EventId { get; set; }
+        public Booking()
+        {
+        }
+
+        public Booking(long telegramUserId, int dogId, int availableSlotId)
+        {
+            TelegramUserId = telegramUserId;
+            DogId = dogId;
+            AvailableSlotId = availableSlotId;
+
+            BookedAt = DateTime.UtcNow;
+            Status = BookingStatusEnum.Awaiting;
+        }
 
         /// <summary>
         /// Идентификатор пользователя, осуществившего бронирование.
         /// </summary>
-        public Guid UserId { get; set; }
+        public long TelegramUserId { get; set; }
+
+        /// <summary>
+        /// Идентификатор собаки.
+        /// </summary>
+        public int DogId { get; set; }
+
+        /// <summary>
+        /// Идентификатор события, к которому относится бронирование.
+        /// </summary>
+        public int AvailableSlotId { get; set; }
 
         /// <summary>
         /// Время, когда было создано бронирование.
@@ -30,13 +49,18 @@ namespace DogLiveBot.Data.Context.Entity
         public BookingStatusEnum Status { get; set; }
 
         /// <summary>
-        /// Связанное событие, к которому относится бронирование.
-        /// </summary>
-        public Event Event { get; set; }
-
-        /// <summary>
         /// Пользователь, осуществивший бронирование.
         /// </summary>
         public User User { get; set; }
+
+        /// <summary>
+        /// Собака пользователя
+        /// </summary>
+        public Dog Dog { get; set; }
+
+        /// <summary>
+        /// Слот времени
+        /// </summary>
+        public AvailableSlot AvailableSlot { get; set; }
     }
 }

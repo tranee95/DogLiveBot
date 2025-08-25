@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DogLiveBot.Data.Repository.RepositoryInterfaces;
 
-public interface IChangeRepository : IDisposable
+public interface IRepository : IDisposable
 {
     /// <summary>
     /// Создает новую транзакцию.
@@ -21,7 +21,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="entity">Добавляемая сущность.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task Add<TEntity>(TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Добавляет новую сущность с использованием транзакции.
@@ -31,7 +31,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="transaction">Идентификатор транзакции.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task Add<TEntity>(TEntity entity, IDbContextTransaction transaction, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Добавляет массив сущностей.
@@ -40,7 +40,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="entities">Список добавляемых сущностей.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task AddRange<TEntity>(TEntity[] entities, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Добавляет массив сущностей с использованием транзакции.
@@ -50,7 +50,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="transaction">Идентификатор транзакции.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task AddRange<TEntity>(TEntity[] entities, IDbContextTransaction transaction, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Обновляет сущность.
@@ -59,7 +59,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="entity">Обновляемая сущность.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task Update<TEntity>(TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Обновляет сущность с использованием транзакции.
@@ -69,7 +69,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="transaction">Идентификатор транзакции.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     Task Update<TEntity>(TEntity entity, IDbContextTransaction transaction, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Удаляет сущность по идентификатору.
@@ -78,8 +78,8 @@ public interface IChangeRepository : IDisposable
     /// <param name="id">Уникальный идентификатор сущности.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>True, если успешно удалено; иначе — false.</returns>
-    Task<bool> Delete<TEntity>(Guid id, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+    Task<bool> Delete<TEntity>(int id, CancellationToken cancellationToken)
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Удаляет сущность по идентификатору с использованием транзакции.
@@ -89,8 +89,8 @@ public interface IChangeRepository : IDisposable
     /// <param name="transaction">Идентификатор транзакции.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>True, если успешно удалено; иначе — false.</returns>
-    Task<bool> Delete<TEntity>(Guid id, IDbContextTransaction transaction, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+    Task<bool> Delete<TEntity>(int id, IDbContextTransaction transaction, CancellationToken cancellationToken)
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Удаляет указанную сущность.
@@ -100,7 +100,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>True, если успешно удалено; иначе — false.</returns>
     Task<bool> Delete<TEntity>(TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Удаляет указанную сущность с учетом транзакции.
@@ -111,7 +111,7 @@ public interface IChangeRepository : IDisposable
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>True, если успешно удалено; иначе — false.</returns>
     Task<bool> Delete<TEntity>(TEntity entity, IDbContextTransaction transaction, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
     
     /// <summary>
     /// Выполняет пакетное обновление сущностей на основе фильтра.
@@ -120,5 +120,5 @@ public interface IChangeRepository : IDisposable
         Expression<Func<TEntity, bool>> filter,
         Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateAction,
         CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 }

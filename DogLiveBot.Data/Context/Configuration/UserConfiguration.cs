@@ -21,6 +21,10 @@ namespace DogLiveBot.Data.Context.Configuration
 
             builder.Property(s => s.LastName)
                 .IsRequired(false);
+            
+            builder.HasAlternateKey(u => u.TelegramId);
+
+            builder.HasIndex(u => u.TelegramId).IsUnique();
         }
     }
 }

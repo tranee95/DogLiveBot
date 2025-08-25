@@ -3,7 +3,7 @@ namespace DogLiveBot.Data.Context.Entity
     /// <summary>
     /// Представляет пользователя в системе.
     /// </summary>
-    public class User : BaseEntity<Guid>
+    public class User : BaseEntity<int>
     {
         /// <summary>
         /// Идентификатор пользователя в Telegram.

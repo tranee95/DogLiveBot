@@ -7,12 +7,12 @@ namespace DogLiveBot.Data.Enums;
 /// </summary>
 public enum BookingStatusEnum
 {
-   [Description("Ожидает")]
-   Awaiting,
-   
-   [Description("Подтверждено")]
-   Сonfirmed,
-   
-   [Description("Отменено")]
-   Сancelled
+    [Description("Ожидает")] 
+    Awaiting = 1,
+
+    [Description("Подтверждено")] 
+    Сonfirmed = 2,
+
+    [Description("Отменено")] 
+    Сancelled = 3
 }

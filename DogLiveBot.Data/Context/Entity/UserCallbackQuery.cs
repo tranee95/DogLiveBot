@@ -4,7 +4,7 @@ namespace DogLiveBot.Data.Context.Entity
     /// Представляет собой сущность, содержащую информацию о
     /// запросах вызова пользователей в приложении.
     /// </summary>
-    public class UserCallbackQuery : BaseEntity<Guid>
+    public class UserCallbackQuery : BaseEntity<int>
     {
         /// <summary>
         /// Уникальный идентификатор запроса обратного вызова.

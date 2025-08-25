@@ -21,7 +21,7 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
         CancellationToken cancellationToken, 
         bool getDeleted = false, 
         bool asNoTracking = true) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -37,12 +37,12 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var query = PrepareQuery(context, filter, getDeleted, asNoTracking);
-            return await query.Where(filter).Select(selector).FirstOrDefaultAsync(cancellationToken);
+            return await query.Select(selector).FirstOrDefaultAsync(cancellationToken);
         }
     }
 
@@ -52,7 +52,7 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -69,28 +69,28 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var query = PrepareQuery(context, filter, getDeleted, asNoTracking);
-            return await query.Where(filter).ToArrayAsync(cancellationToken);
+            return await query.ToArrayAsync(cancellationToken);
         }
     }
 
     /// <inheritdoc/>
-    public async Task<ICollection<TResult>> WhereSelected<TEntity, TResult>(
+    public async Task<ICollection<TResult>> GetSelected<TEntity, TResult>(
         Expression<Func<TEntity, bool>> filter, 
         Expression<Func<TEntity, TResult>> selector,
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var query = PrepareQuery(context, filter, getDeleted, asNoTracking);
-            return await query.Where(filter).Select(selector).ToArrayAsync(cancellationToken);
+            return await query.Select(selector).ToArrayAsync(cancellationToken);
         }
     }
 
@@ -100,19 +100,19 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false, 
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             var query = PrepareQuery(context, filter, getDeleted, asNoTracking);
-            return await query.OrderByDescending(s => s.CreateDate).LastOrDefaultAsync(filter, cancellationToken);
+            return await query.OrderByDescending(s => s.CreateDate).FirstOrDefaultAsync(cancellationToken);
         }
     }
 
 
 
     private IQueryable<TEntity> ApplyDeleteFilter<TEntity>(IQueryable<TEntity> query, bool getDeleted)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (!getDeleted)
         {
@@ -123,13 +123,13 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
     }
 
     private IQueryable<TEntity> ApplyAsNoTrackingFilter<TEntity>(IQueryable<TEntity> query, bool asNoTracking)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         return asNoTracking ? query.AsNoTracking() : query;
     }
 
     private IQueryable<TEntity> PrepareQuery<TEntity>(ApplicationDbContext context, Expression<Func<TEntity, bool>> filter, bool getDeleted, bool asNoTracking)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         var query = context.Set<TEntity>().Where(filter);
 

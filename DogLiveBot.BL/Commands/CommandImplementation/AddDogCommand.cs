@@ -1,10 +1,12 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
+using DogLiveBot.BL.Services.ServiceInterface.Command;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using DogLiveBot.Data.Text;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -15,7 +17,7 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 {
     private readonly ILogger<AddDogCommand> _logger;
     private readonly ITelegramBotClient _botClient;
-    private readonly IChangeRepository _changeRepository;
+    private readonly IRepository _repository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
 
@@ -23,15 +25,15 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         ILogger<AddDogCommand> logger,
         IMapper mapper,
         ITelegramBotClient botClient,
-        IChangeRepository changeRepository,
+        IRepository repository,
         IReadOnlyRepository readOnlyRepository, 
         ICommandService commandService, 
         ICacheService cacheService)
-        : base(mapper, botClient, changeRepository, readOnlyRepository)
+        : base(mapper, botClient, repository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
-        _changeRepository = changeRepository;
+        _repository = repository;
         _commandService = commandService;
         _cacheService = cacheService;
     }
@@ -49,7 +51,7 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
             {
                 var dog = new Dog(message.Text, message.Chat.Id);
 
-                await _changeRepository.Add<Dog>(dog, cancellationToken);
+                await _repository.Add(dog, cancellationToken);
                 await SendMessage(message, $"{MessageText.AddDogSuccess}", cancellationToken);
 
                 var cacheKey = $"settings:{message.Chat.Id}";

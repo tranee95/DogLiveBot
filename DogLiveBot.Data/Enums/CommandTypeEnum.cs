@@ -12,8 +12,8 @@ public enum CommandTypeEnum
     [Description("/registratin")]
     Registration,
 
-    [Description("/signUpForClass")]
-    SignUpForClass,
+    [Description("/createBooking")]
+    CreateBooking,
 
     [Description("/myNotes")]
     MyNotes,

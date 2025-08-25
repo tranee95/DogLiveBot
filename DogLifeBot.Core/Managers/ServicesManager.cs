@@ -8,7 +8,19 @@ using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.BL.Jobs;
 using DogLiveBot.BL.Services.ServiceImplementation;
+using DogLiveBot.BL.Services.ServiceImplementation.Cache;
+using DogLiveBot.BL.Services.ServiceImplementation.Command;
+using DogLiveBot.BL.Services.ServiceImplementation.Keyboard;
+using DogLiveBot.BL.Services.ServiceImplementation.Schedule;
+using DogLiveBot.BL.Services.ServiceImplementation.Telegram;
+using DogLiveBot.BL.Services.ServiceImplementation.User;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
+using DogLiveBot.BL.Services.ServiceInterface.Command;
+using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
+using DogLiveBot.BL.Services.ServiceInterface.Schedule;
+using DogLiveBot.BL.Services.ServiceInterface.Telegram;
+using DogLiveBot.BL.Services.ServiceInterface.User;
 using DogLiveBot.Core.Managers.Extensions;
 using DogLiveBot.Data.Context;
 using DogLiveBot.Data.Models.Options;
@@ -68,7 +80,7 @@ public static class ServicesManager
             contextOptionsBuilder.UseNpgsql(settings.ApplicationDbConnection.ConnectionString);
         });
         services.AddScoped<IReadOnlyRepository, ApplicationReadOnlyRepository>();
-        services.AddScoped<IChangeRepository, ApplicationChangeRepository>();
+        services.AddScoped<IRepository, ApplicationRepository>();
     }
 
     /// <summary>
@@ -148,6 +160,7 @@ public static class ServicesManager
         services.AddScoped<IMessageHandler, TextMessageHandler>();
         services.AddScoped<IMessageHandler, ContactMessageHandler>();
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<IBookingFlowCacheService, BookingFlowCacheService>();
     }
 
     /// <summary>
@@ -164,7 +177,7 @@ public static class ServicesManager
         services.AddScoped<ICommand, RulesCommand>();
         services.AddScoped<ICommand, SettingsCommand>();
         services.AddScoped<ICommand, ShowPaymentDetailsCommand>();
-        services.AddScoped<ICommand, SignUpForClassCommand>();
+        services.AddScoped<ICommand, CreateBookingCommand>();
         services.AddScoped<ICommand, RenameCommand>();
         services.AddScoped<ICommand, AddDogCommand>();
         services.AddScoped<ICommand, BackCommand>();
@@ -177,6 +190,6 @@ public static class ServicesManager
 
         services.AddScoped<IReceivedDataCommandFactory, ReceivedDataCommandFactory>();
         services.AddScoped<IReceivedDataCommand, DeleteDogCommand>();
-        services.AddScoped<IReceivedDataCommand, SignUpForClassCommand>();
+        services.AddScoped<IReceivedDataCommand, CreateBookingCommand>();
     }
 }

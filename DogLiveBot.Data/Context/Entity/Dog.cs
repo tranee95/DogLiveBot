@@ -3,7 +3,7 @@ namespace DogLiveBot.Data.Context.Entity
     /// <summary>
     /// Представляет сущность собаки, связанной с пользователем.
     /// </summary>
-    public class Dog : BaseEntity<Guid>
+    public class Dog : BaseEntity<int>
     {
         public Dog()
         {

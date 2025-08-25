@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DogLiveBot.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250629133037_Initial")]
+    [Migration("20250825195349_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -27,94 +27,121 @@ namespace DogLiveBot.Data.Migrations
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.AvailableSlot", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("date");
 
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("boolean");
+                    b.Property<bool>("IsReserved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("ScheduleId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("interval");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ScheduleId");
+                    b.HasIndex("ScheduleId", "DayOfWeek", "StartTime")
+                        .IsUnique();
 
-                    b.ToTable("AvailableSlots");
+                    b.ToTable("AvailableSlots", t =>
+                        {
+                            t.HasCheckConstraint("CK_AvailableSlot_TimeRange", "\"StartTime\" < \"EndTime\"");
+                        });
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Booking", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AvailableSlotId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("BookedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("DogId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("AvailableSlotId")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DogId");
+
+                    b.HasIndex("TelegramUserId");
+
+                    b.HasIndex("TelegramUserId", "DogId", "AvailableSlotId")
+                        .IsUnique();
 
                     b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Dog", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -130,67 +157,31 @@ namespace DogLiveBot.Data.Migrations
                     b.ToTable("Dogs");
                 });
 
-            modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Event", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsBooked")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Events");
-                });
-
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Schedule", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActiveWeek")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("WeekEndDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("WeekStartDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -199,15 +190,17 @@ namespace DogLiveBot.Data.Migrations
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -217,7 +210,7 @@ namespace DogLiveBot.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -228,14 +221,19 @@ namespace DogLiveBot.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TelegramId")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.UserCallbackQuery", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CallbackQueryId")
                         .IsRequired()
@@ -245,17 +243,17 @@ namespace DogLiveBot.Data.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("UserTelegramId")
                         .HasColumnType("bigint");
@@ -265,7 +263,7 @@ namespace DogLiveBot.Data.Migrations
                     b.HasIndex("UserTelegramId")
                         .IsUnique();
 
-                    b.ToTable("UserCallbackQuerys");
+                    b.ToTable("UserCallbackQueries");
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.AvailableSlot", b =>
@@ -281,19 +279,28 @@ namespace DogLiveBot.Data.Migrations
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Booking", b =>
                 {
-                    b.HasOne("DogLiveBot.Data.Context.Entity.Event", "Event")
-                        .WithMany("Bookings")
-                        .HasForeignKey("EventId")
+                    b.HasOne("DogLiveBot.Data.Context.Entity.AvailableSlot", "AvailableSlot")
+                        .WithMany()
+                        .HasForeignKey("AvailableSlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DogLiveBot.Data.Context.Entity.Dog", "Dog")
+                        .WithMany()
+                        .HasForeignKey("DogId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DogLiveBot.Data.Context.Entity.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("TelegramUserId")
+                        .HasPrincipalKey("TelegramId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Event");
+                    b.Navigation("AvailableSlot");
+
+                    b.Navigation("Dog");
 
                     b.Navigation("User");
                 });
@@ -320,11 +327,6 @@ namespace DogLiveBot.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Event", b =>
-                {
-                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("DogLiveBot.Data.Context.Entity.Schedule", b =>

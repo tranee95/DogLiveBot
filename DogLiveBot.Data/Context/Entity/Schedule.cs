@@ -5,7 +5,7 @@ namespace DogLiveBot.Data.Context.Entity
     /// Включает даты начала и окончания недели, а также коллекцию
     /// доступных временных интервалов в рамках этой недели.
     /// </summary>
-    public class Schedule : BaseEntity<Guid>
+    public class Schedule : BaseEntity<int>
     {
         public Schedule()
         {

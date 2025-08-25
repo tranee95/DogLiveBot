@@ -1,5 +1,4 @@
 using AutoMapper;
-using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
@@ -7,7 +6,6 @@ using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using User = DogLiveBot.Data.Context.Entity.User;
 
 namespace DogLiveBot.BL.Commands.CommandImplementation;
 
@@ -18,7 +16,7 @@ public abstract class CallbackQueryCommand : ICommand
         public MapperProfile()
         {
             CreateMap<CallbackQuery, UserCallbackQuery>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => default(int)))
                 .ForMember(dest => dest.UserTelegramId, opt => opt.MapFrom(src => src.From.Id))
                 .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Data))
                 .ForMember(dest => dest.ChatId, opt => opt.MapFrom(src => src.Message.Chat.Id))
@@ -28,18 +26,18 @@ public abstract class CallbackQueryCommand : ICommand
 
     private readonly IMapper _mapper;
     private readonly ITelegramBotClient _botClient;
-    private readonly IChangeRepository _changeRepository;
+    private readonly IRepository _repository;
     private readonly IReadOnlyRepository _readOnlyRepository;
 
     protected CallbackQueryCommand(
         IMapper mapper,
         ITelegramBotClient telegramBotClient,
-        IChangeRepository changeRepository, 
+        IRepository repository, 
         IReadOnlyRepository readOnlyRepository)
     {
         _mapper = mapper;
         _botClient = telegramBotClient;
-        _changeRepository = changeRepository;
+        _repository = repository;
         _readOnlyRepository = readOnlyRepository;
     }
 
@@ -63,8 +61,8 @@ public abstract class CallbackQueryCommand : ICommand
     /// <param name="callbackQuery">Обратный вызов, полученный от Telegram.</param>
     public async Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
-        await HandleCallbackQuery(callbackQuery, cancellationToken);
         await ExecuteCommandLogic(message, cancellationToken, callbackQuery);
+        await HandleCallbackQuery(callbackQuery, cancellationToken);
     }
 
     /// <summary>
@@ -107,13 +105,13 @@ public abstract class CallbackQueryCommand : ICommand
         if (userLastCallbackQuery == null)
         {
             var userCallbackQuery = _mapper.Map<CallbackQuery, UserCallbackQuery>(callbackQuery);
-            await _changeRepository.Add<UserCallbackQuery>(userCallbackQuery, cancellationToken);
+            await _repository.Add(userCallbackQuery, cancellationToken);
         }
         else
         {
             userLastCallbackQuery.CallbackQueryId = callbackQuery.Id;
             userLastCallbackQuery.Data = CommandType.GetDescription();
-            await _changeRepository.Update<UserCallbackQuery>(userLastCallbackQuery, cancellationToken);
+            await _repository.Update(userLastCallbackQuery, cancellationToken);
         }
     }
 }

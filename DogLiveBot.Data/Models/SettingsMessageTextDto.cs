@@ -1,6 +1,6 @@
 namespace DogLiveBot.Data.Models;
 
-public class SettingsMessageTextModel
+public class SettingsMessageTextDto
 {
      /// <summary>
      /// Имя пользователя

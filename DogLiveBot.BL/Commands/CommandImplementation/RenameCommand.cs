@@ -1,9 +1,11 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
+using DogLiveBot.BL.Services.ServiceInterface.Command;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using DogLiveBot.Data.Text;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -15,7 +17,7 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 {
     private readonly ILogger<RenameCommand> _logger;
     private readonly ITelegramBotClient _botClient;
-    private readonly IChangeRepository _changeRepository;
+    private readonly IRepository _repository;
     private readonly IReadOnlyRepository _readOnlyRepository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
@@ -25,17 +27,17 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         ILogger<RenameCommand> logger, 
         ITelegramBotClient botClient, 
         IReadOnlyRepository readOnlyRepository,
-        IChangeRepository changeRepository,
+        IRepository repository,
         ICommandService commandService, 
         ICacheService cacheService) 
-        : base(mapper, botClient, changeRepository, readOnlyRepository)
+        : base(mapper, botClient, repository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
         _readOnlyRepository = readOnlyRepository;
         _commandService = commandService;
         _cacheService = cacheService;
-        _changeRepository = changeRepository;
+        _repository = repository;
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.Rename;
@@ -56,7 +58,7 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
                 {
                     user.FirstName = message.Text.Trim();
 
-                    await _changeRepository.Update<User>(user, cancellationToken);
+                    await _repository.Update(user, cancellationToken);
                     await SendMessage(message, MessageText.UserHasRename, cancellationToken);
 
                     var cacheKey = $"settings:{message.Chat.Id}";

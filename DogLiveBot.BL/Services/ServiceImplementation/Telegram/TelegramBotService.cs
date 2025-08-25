@@ -1,5 +1,6 @@
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Telegram;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -7,7 +8,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace DogLiveBot.BL.Services.ServiceImplementation
+namespace DogLiveBot.BL.Services.ServiceImplementation.Telegram
 {
     public class TelegramBotService : ITelegramBotService
     {

@@ -10,13 +10,26 @@ namespace DogLiveBot.Data.Context.Configuration
         {
             builder.HasKey(s => s.Id);
 
-            builder.HasOne(s => s.Event)
-                .WithMany(u => u.Bookings)
-                .HasForeignKey(s => s.EventId);
+            builder.HasIndex(s => s.TelegramUserId);
+            builder.HasIndex(s => s.AvailableSlotId).IsUnique();
+
+            builder.HasIndex(s => new { s.TelegramUserId, s.DogId, s.AvailableSlotId }).IsUnique();
 
             builder.HasOne(s => s.User)
                 .WithMany()
-                .HasForeignKey(s => s.UserId);
+                .HasForeignKey(s => s.TelegramUserId)
+                .HasPrincipalKey(u => u.TelegramId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(s => s.Dog)
+                .WithMany()
+                .HasForeignKey(s => s.DogId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.HasOne(s => s.AvailableSlot)
+                .WithMany()
+                .HasForeignKey(s => s.AvailableSlotId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

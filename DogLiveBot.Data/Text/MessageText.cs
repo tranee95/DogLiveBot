@@ -1,4 +1,4 @@
-namespace DogLiveBot.Data.Menu;
+namespace DogLiveBot.Data.Text;
 
 public static class MessageText
 {
@@ -43,4 +43,10 @@ public static class MessageText
     public static readonly string DeleteDogError = "Ошибка удаления собаки";
     public static readonly string DeleteDogSuccess = "Собака удалена из профиля";
     public static readonly string DogDeleted = "Вы успешно удалили собаку из своего профиля";
+
+    public static readonly string ThereNoAvailableSlots = "Нет доступных слотов на выбранный день. Выберите другой день.";
+    public static readonly string ChooseTime = "Выберите доступное время:";
+    public static readonly string RestartBookingFlow = "Не удалось распознать выбор. Давайте начнем заново.";
+    public static readonly string BookingCreatedTemplate = "Готово! Запись создана на {0}, {1}.";
+    public static readonly string SlotAlreadyReserved = "Увы, этот слот уже занят. Пожалуйста, выберите другое время.";
 }

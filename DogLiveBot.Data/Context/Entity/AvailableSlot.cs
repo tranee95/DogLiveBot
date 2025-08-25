@@ -5,27 +5,27 @@ namespace DogLiveBot.Data.Context.Entity
     /// Содержит информацию о дне недели, времени начала и окончания, а также 
     /// доступности интервала.
     /// </summary>
-    public class AvailableSlot : BaseEntity<Guid>
+    public class AvailableSlot : BaseEntity<int>
     {
         public AvailableSlot()
         {
         }
 
-        public AvailableSlot(Guid scheduleId, DayOfWeek dayOfWeek, TimeSpan time, TimeSpan interval, 
-            bool isAvailable = true)
+        public AvailableSlot(int scheduleId, DayOfWeek dayOfWeek, TimeSpan time, TimeSpan interval, 
+            bool isReserved = false)
         {
             ScheduleId = scheduleId;
             DayOfWeek = dayOfWeek;
-            Date = DateTime.Now.AddDays((int)dayOfWeek);
+            Date = DateTime.UtcNow.AddDays((int)dayOfWeek);
             StartTime = time;
             EndTime = time.Add(interval);
-            IsAvailable = isAvailable;
+            IsReserved = isReserved;
         }
 
         /// <summary>
         /// Идентификатор связанного расписания.
         /// </summary>
-        public Guid ScheduleId { get; set; }
+        public int ScheduleId { get; set; }
 
         /// <summary>
         /// Дата занятия
@@ -48,9 +48,9 @@ namespace DogLiveBot.Data.Context.Entity
         public TimeSpan EndTime { get; set; }
 
         /// <summary>
-        /// Определяет, является ли данный временной интервал доступным.
+        /// Определяет, является ли данный временной интервал зарезервированым.
         /// </summary>
-        public bool IsAvailable { get; set; }
+        public bool IsReserved { get; set; }
 
         /// <summary>
         /// Связанное расписание, к которому относится данный интервал.

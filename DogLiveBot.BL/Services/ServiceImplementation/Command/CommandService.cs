@@ -1,12 +1,12 @@
 using DogLiveBot.BL.Commands.CommandFactory;
-using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Command;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums.Helpers;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace DogLiveBot.BL.Services.ServiceImplementation;
+namespace DogLiveBot.BL.Services.ServiceImplementation.Command;
 
 public class CommandService : ICommandService
 {

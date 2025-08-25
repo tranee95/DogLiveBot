@@ -1,6 +1,4 @@
-using DogLiveBot.Data.Context.Entity;
-
-namespace DogLiveBot.BL.Services.ServiceInterface;
+namespace DogLiveBot.BL.Services.ServiceInterface.User;
 
 /// <summary>
 /// Интерфейс для управления пользователями.
@@ -12,5 +10,5 @@ public interface IUserService
     /// </summary>
     /// <param name="user">Пользователь, который должен быть создан.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
-    Task<bool> CreateIfNotExistAsync(User user, CancellationToken cancellationToken);
+    Task<bool> CreateIfNotExistAsync(Data.Context.Entity.User user, CancellationToken cancellationToken);
 }

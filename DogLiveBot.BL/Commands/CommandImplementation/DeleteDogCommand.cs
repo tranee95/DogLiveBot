@@ -1,11 +1,14 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
-using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
+using DogLiveBot.BL.Services.ServiceInterface.Command;
+using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Models;
+using DogLiveBot.Data.Models.CommandData;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using DogLiveBot.Data.Text;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -18,7 +21,7 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
     private readonly ITelegramBotClient _botClient;
     private readonly IKeyboardService _keyboardService;
     private readonly IReadOnlyRepository _readOnlyRepository;
-    private readonly IChangeRepository _changeRepository;
+    private readonly IRepository _repository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
 
@@ -26,16 +29,16 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
         ILogger<DeleteDogCommand> logger,
         IMapper mapper, 
         ITelegramBotClient botClient, 
-        IChangeRepository changeRepository,
+        IRepository repository,
         IReadOnlyRepository readOnlyRepository, 
         IKeyboardService keyboardService, 
         ICommandService commandService, 
         ICacheService cacheService) 
-        : base(mapper, botClient, changeRepository, readOnlyRepository)
+        : base(mapper, botClient, repository, readOnlyRepository)
     {
         _logger = logger;
         _botClient = botClient;
-        _changeRepository = changeRepository;
+        _repository = repository;
         _keyboardService = keyboardService;
         _readOnlyRepository = readOnlyRepository;
         _commandService = commandService;
@@ -47,9 +50,9 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
 
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {
-        var dogs = await _readOnlyRepository.WhereSelected<Dog, DogDeleteModel>(
+        var dogs = await _readOnlyRepository.GetSelected<Dog, DogDeleteDto>(
             filter: s => s.UserTelegramId == message.Chat.Id,
-            selector: s => new DogDeleteModel()
+            selector: s => new DogDeleteDto()
             {
                 Id = s.Id,
                 Name = s.Name
@@ -65,7 +68,8 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
     {
         try
         {
-            if (!await _changeRepository.Delete<Dog>(commandData.Id, cancellationToken))
+            var dogId = commandData.GetData<int>();
+            if (!await _repository.Delete<Dog>(dogId, cancellationToken))
             {
                 throw new NullReferenceException("Dog not found");
             }

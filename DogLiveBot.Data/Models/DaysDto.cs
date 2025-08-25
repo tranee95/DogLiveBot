@@ -2,7 +2,7 @@ using DogLiveBot.Data.Enums;
 
 namespace DogLiveBot.Data.Models;
 
-public class DaysModel
+public class DaysDto
 {
     /// <summary>
     /// Текстовая дата дня недели для кнопки
@@ -17,5 +17,5 @@ public class DaysModel
     /// <summary>
     /// Команда
     /// </summary>
-    public CommandTypeEnum CommandType => CommandTypeEnum.SignUpForClass;  
+    public CommandTypeEnum CommandType => CommandTypeEnum.CreateBooking;  
 }

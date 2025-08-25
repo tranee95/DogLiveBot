@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace DogLiveBot.BL.Services.ServiceInterface;
+namespace DogLiveBot.BL.Services.ServiceInterface.Command;
 
 public interface ICommandService
 {

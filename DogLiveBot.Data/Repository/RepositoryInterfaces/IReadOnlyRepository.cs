@@ -19,7 +19,7 @@ public interface IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Получает первую сущность по указанному фильтру и проецирует результат.
@@ -38,7 +38,7 @@ public interface IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Проверяет наличие сущности, удовлетворяющей заданным условиям.
@@ -54,7 +54,7 @@ public interface IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Возвращает коллекцию сущностей, соответствующих указанному условию.
@@ -64,18 +64,18 @@ public interface IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Возвращает коллекцию проекций на основе сущностей по фильтру.
     /// </summary>
-    Task<ICollection<TResult>> WhereSelected<TEntity, TResult>(
+    Task<ICollection<TResult>> GetSelected<TEntity, TResult>(
         Expression<Func<TEntity, bool>> filter,
         Expression<Func<TEntity, TResult>> selector,
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 
     /// <summary>
     /// Получает последнюю сущность из выборки.
@@ -85,5 +85,5 @@ public interface IReadOnlyRepository
         CancellationToken cancellationToken,
         bool getDeleted = false,
         bool asNoTracking = true)
-        where TEntity : BaseEntity<Guid>;
+        where TEntity : BaseEntity<int>;
 }

@@ -1,4 +1,4 @@
-namespace DogLiveBot.BL.Services.ServiceInterface;
+namespace DogLiveBot.BL.Services.ServiceInterface.Telegram;
 
 public interface ITelegramBotService
 {

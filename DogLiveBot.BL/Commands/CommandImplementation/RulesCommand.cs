@@ -1,7 +1,8 @@
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
+using DogLiveBot.Data.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 

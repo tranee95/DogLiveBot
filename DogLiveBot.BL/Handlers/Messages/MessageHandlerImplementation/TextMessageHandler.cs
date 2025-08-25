@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DogLiveBot.BL.Commands.CommandFactory;
 using DogLiveBot.BL.Commands.ReceivedDataCommandFactory;
 using DogLiveBot.BL.Commands.ReceivedTextCommandFactory;
@@ -5,10 +6,9 @@ using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Helpers;
-using DogLiveBot.Data.Models;
+using DogLiveBot.Data.Models.CommandData;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -134,10 +134,10 @@ public class TextMessageHandler : IMessageHandler
     {
         try
         {
-            result = JsonConvert.DeserializeObject<T>(json);
+            result = JsonSerializer.Deserialize<T>(json);
             return result != null;
         }
-        catch (JsonReaderException)
+        catch
         {
             result = default;
             return false;

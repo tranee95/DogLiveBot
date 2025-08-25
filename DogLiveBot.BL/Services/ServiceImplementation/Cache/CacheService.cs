@@ -1,9 +1,10 @@
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
 using DogLiveBot.Data.Models.Options;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
-namespace DogLiveBot.BL.Services.ServiceImplementation;
+namespace DogLiveBot.BL.Services.ServiceImplementation.Cache;
 
 public class CacheService : ICacheService
 {

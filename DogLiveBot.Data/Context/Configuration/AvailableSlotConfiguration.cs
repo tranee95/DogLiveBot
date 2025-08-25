@@ -14,8 +14,20 @@ namespace DogLiveBot.Data.Context.Configuration
                 .WithMany(s => s.AvailableSlots)
                 .HasForeignKey(s => s.ScheduleId);
 
+            builder.Property(s => s.IsReserved)
+                .HasDefaultValue(false);
+
             builder.Property(s => s.Date)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("date");
+
+            builder.HasIndex(s => new { s.ScheduleId, s.DayOfWeek, s.StartTime })
+                .IsUnique();
+
+            // Валидация: начало < конец
+            builder.ToTable(t => t.HasCheckConstraint("CK_AvailableSlot_TimeRange", "\"StartTime\" < \"EndTime\""));
+
+            // Используем системную колонку xmin для конкуренции (PostgreSQL)
+            builder.UseXminAsConcurrencyToken();
         }
     }
 }

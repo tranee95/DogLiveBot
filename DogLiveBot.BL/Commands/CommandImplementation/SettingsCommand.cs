@@ -1,10 +1,12 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Cache;
+using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
 using DogLiveBot.Data.Enums;
-using DogLiveBot.Data.Menu;
 using DogLiveBot.Data.Models;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
+using DogLiveBot.Data.Text;
 using Quartz.Util;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -22,11 +24,11 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
     public SettingsCommand(
         IMapper mapper,
         ITelegramBotClient botClient,
-        IChangeRepository changeRepository,
+        IRepository repository,
         IReadOnlyRepository readOnlyRepository,
         IKeyboardService keyboardService, 
         ICacheService cacheService) 
-        : base(mapper, botClient, changeRepository, readOnlyRepository)
+        : base(mapper, botClient, repository, readOnlyRepository)
     {
         _keyboardService = keyboardService;
         _readOnlyRepository = readOnlyRepository;
@@ -56,9 +58,9 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
             return cacheValue;
         }
         
-        var settingsMessageText = await _readOnlyRepository.GetFirstOrDefaultSelected<User, SettingsMessageTextModel>(
+        var settingsMessageText = await _readOnlyRepository.GetFirstOrDefaultSelected<User, SettingsMessageTextDto>(
             filter: s => s.TelegramId == message.Chat.Id,
-            selector: s => new SettingsMessageTextModel
+            selector: s => new SettingsMessageTextDto
             {
                 UserName = $"{s.FirstName}",
                 DogNames = s.Dogs.Where(t => t.DeleteDate == null).Select(d => $" - {d.Name}").ToArray()

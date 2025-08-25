@@ -1,4 +1,5 @@
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Telegram;
 using DogLiveBot.Core.Managers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

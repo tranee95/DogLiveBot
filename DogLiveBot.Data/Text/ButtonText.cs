@@ -3,7 +3,7 @@ namespace DogLiveBot.Data.Text;
 public static class ButtonText
 {
     public static readonly string SendPhoneNumber = "\u260E Отправить номер телефона";
-    public static readonly string SignUpForClass = "\ud83d\udcdd Записаться на занятие";
+    public static readonly string CreateBooking = "\ud83d\udcdd Записаться на занятие";
     public static readonly string MyNotes = "\ud83d\uddd3\ufe0f Мои записи";
     public static readonly string Settings = "\u2699\ufe0f Настройки";
     public static readonly string ShowPaymentDetails = "\ud83d\udcb5 Показать реквизиты для оплаты";

@@ -1,26 +1,26 @@
 using DogLiveBot.BL.Services.ServiceInterface;
-using DogLiveBot.Data.Context.Entity;
+using DogLiveBot.BL.Services.ServiceInterface.User;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 
-namespace DogLiveBot.BL.Services.ServiceImplementation;
+namespace DogLiveBot.BL.Services.ServiceImplementation.User;
 
 public class UserService : IUserService
 {
-    private readonly IChangeRepository _changeRepository;
+    private readonly IRepository _repository;
     private readonly IReadOnlyRepository _readOnlyRepository;
 
     public UserService(
         IReadOnlyRepository readOnlyRepository, 
-        IChangeRepository changeRepository)
+        IRepository repository)
     {
         _readOnlyRepository = readOnlyRepository;
-        _changeRepository = changeRepository;
+        _repository = repository;
     }
     
     /// <inheritdoc />
-    public async Task<bool> CreateIfNotExistAsync(User user, CancellationToken cancellationToken)
+    public async Task<bool> CreateIfNotExistAsync(Data.Context.Entity.User user, CancellationToken cancellationToken)
     {
-        var ifExist = await _readOnlyRepository.IfExists<User>(
+        var ifExist = await _readOnlyRepository.IfExists<Data.Context.Entity.User>(
             filter: s => s.PhoneNumber == user.PhoneNumber, 
             cancellationToken: cancellationToken);
 
@@ -29,7 +29,7 @@ public class UserService : IUserService
             return false;
         }
 
-        await _changeRepository.Add(user, cancellationToken);
+        await _repository.Add(user, cancellationToken);
         return true;
     }
 }

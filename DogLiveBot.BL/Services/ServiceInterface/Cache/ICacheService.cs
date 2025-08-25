@@ -1,4 +1,4 @@
-namespace DogLiveBot.BL.Services.ServiceInterface;
+namespace DogLiveBot.BL.Services.ServiceInterface.Cache;
 
 public interface ICacheService
 {

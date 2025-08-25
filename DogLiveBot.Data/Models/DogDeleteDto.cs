@@ -2,12 +2,12 @@ using DogLiveBot.Data.Enums;
 
 namespace DogLiveBot.Data.Models;
 
-public class DogDeleteModel
+public class DogDeleteDto
 {
     /// <summary>
     /// Идентификатор собаки
     /// </summary>
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Кличка собаки

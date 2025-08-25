@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DogLiveBot.Data.Repository.RepositoryImplementations;
 
-public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
+public class ApplicationRepository : IRepository, IAsyncDisposable
 { 
     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     
     private ApplicationDbContext? _transactionContext;
 
-    public ApplicationChangeRepository(
+    public ApplicationRepository(
         IDbContextFactory<ApplicationDbContext> contextFactory)
     {
         _contextFactory = contextFactory;
@@ -30,7 +30,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task Add<TEntity>(TEntity entity, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -40,7 +40,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task Add<TEntity>(TEntity entity, IDbContextTransaction transaction, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (_transactionContext is null)
         {
@@ -53,7 +53,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task AddRange<TEntity>(TEntity[] entitys, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -63,7 +63,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task AddRange<TEntity>(TEntity[] entitys, IDbContextTransaction transaction, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (_transactionContext is null)
         {
@@ -76,7 +76,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task Update<TEntity>(TEntity entity, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -86,7 +86,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task Update<TEntity>(TEntity entity, IDbContextTransaction transaction, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (_transactionContext is null)
         {
@@ -98,8 +98,8 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<bool> Delete<TEntity>(Guid id, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+    public async Task<bool> Delete<TEntity>(int id, CancellationToken cancellationToken) 
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -108,9 +108,9 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<bool> Delete<TEntity>(Guid id, IDbContextTransaction transaction,
+    public async Task<bool> Delete<TEntity>(int id, IDbContextTransaction transaction,
         CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (_transactionContext is null)
         {
@@ -123,7 +123,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
 
     /// <inheritdoc/>
     public async Task<bool> Delete<TEntity>(TEntity entity, CancellationToken cancellationToken) 
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
@@ -134,7 +134,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
     /// <inheritdoc/>
     public async Task<bool> Delete<TEntity>(TEntity entity, IDbContextTransaction transaction,
         CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         if (_transactionContext is null)
         {
@@ -150,14 +150,14 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
         Expression<Func<TEntity, bool>> filter,
         Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> updateAction,
         CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
         {
             await context.Set<TEntity>()
                 .Where(filter)
                 .ExecuteUpdateAsync(updateAction, cancellationToken: cancellationToken);
-            
+
             await context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -183,20 +183,20 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
     }
     
     private async Task AddEntity<TEntity>(ApplicationDbContext context, TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
-        entity.CreateDate = DateTime.Now;
+        entity.CreateDate = DateTime.UtcNow;
 
         await context.Set<TEntity>().AddAsync(entity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task AddRangeEntity<TEntity>(ApplicationDbContext context, TEntity[] entitys, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         foreach (var entity in entitys)
         {
-            entity.CreateDate = DateTime.Now;
+            entity.CreateDate = DateTime.UtcNow;
         }
 
         await context.Set<TEntity>().AddRangeAsync(entitys, cancellationToken);
@@ -204,18 +204,25 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
     }
 
     private async Task UpdateEntity<TEntity>(ApplicationDbContext context, TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
-        entity.ModifiedDate = DateTime.Now;
+        entity.ModifiedDate = DateTime.UtcNow;
+        var existing = await context.Set<TEntity>()
+            .FirstOrDefaultAsync(e => e.Id == entity.Id, cancellationToken);
 
-        context.Set<TEntity>().Attach(entity);
-        context.Entry(entity).State = EntityState.Modified;
+        if (existing is null)
+        {
+            throw new InvalidOperationException($"{typeof(TEntity).Name} with Id={entity.Id} does not exist and cannot be updated.");
+        }
+
+        context.Entry(existing).CurrentValues.SetValues(entity);
+        existing.ModifiedDate = DateTime.UtcNow;
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<bool> DeleteEntity<TEntity>(ApplicationDbContext context, Guid id, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+    private async Task<bool> DeleteEntity<TEntity>(ApplicationDbContext context, int id, CancellationToken cancellationToken)
+        where TEntity : BaseEntity<int>
     {
         var entity = await context.Set<TEntity>().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         if (entity is null)
@@ -223,14 +230,14 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
             return false;
         }
 
-        entity.DeleteDate = DateTime.Now;
+        entity.DeleteDate = DateTime.UtcNow;
         await context.SaveChangesAsync(cancellationToken);
 
         return true;
     }
     
     private async Task<bool> DeleteEntity<TEntity>(ApplicationDbContext context, TEntity entity, CancellationToken cancellationToken)
-        where TEntity : BaseEntity<Guid>
+        where TEntity : BaseEntity<int>
     {
         var deleteEntity = await context.Set<TEntity>().FirstOrDefaultAsync(s => s.Id == entity.Id, cancellationToken);
         if (deleteEntity is null)
@@ -238,7 +245,7 @@ public class ApplicationChangeRepository : IChangeRepository, IAsyncDisposable
             return false;
         }
 
-        deleteEntity.DeleteDate = DateTime.Now;
+        deleteEntity.DeleteDate = DateTime.UtcNow;
         await context.SaveChangesAsync(cancellationToken);
 
         return true;

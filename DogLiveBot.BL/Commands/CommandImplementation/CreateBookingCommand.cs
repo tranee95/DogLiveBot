@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
@@ -25,6 +26,8 @@ public class CreateBookingCommand : CallbackQueryCommand, ICommand, IReceivedDat
     private readonly IScheduleService _scheduleService;
     private readonly ICommandService _commandService;
     private readonly IBookingService _bookingService;
+
+    private readonly CultureInfo Ru = new("ru-RU");
 
     public CreateBookingCommand(
         IMapper mapper,
@@ -149,7 +152,7 @@ public class CreateBookingCommand : CallbackQueryCommand, ICommand, IReceivedDat
         CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {
         await _bookingService.TryReserveSlot(telegramUserId, payload, cancellationToken);
-        await SendConfirmation(message.Chat.Id, cancellationToken);
+        await SendConfirmation(message.Chat.Id, (DayOfWeek)payload.DayOfWeek, payload.TimeSlotId, cancellationToken);
         await GoBack(message, cancellationToken, callbackQuery);
     }
 
@@ -168,9 +171,15 @@ public class CreateBookingCommand : CallbackQueryCommand, ICommand, IReceivedDat
             replyMarkup: _keyboardService.GetDogs(day, timeSlotId, dogs), cancellationToken: cancellationToken);
     }
 
-    private async Task SendConfirmation(long chatId, CancellationToken cancellationToken)
+    private async Task SendConfirmation(long chatId, DayOfWeek dayOfWeek, int timeSlotId, 
+        CancellationToken cancellationToken)
     {
-        await _botClient.SendMessage(chatId, MessageText.BookingCreatedTemplate, cancellationToken: cancellationToken);
+        var timeSlot = await _scheduleService.GetTimeSlotById(timeSlotId, cancellationToken); 
+        var timeText = timeSlot.StartTime.ToString(@"hh\:mm");
+
+        var dayOfWeekRu = Ru.DateTimeFormat.GetDayName(dayOfWeek);
+        await _botClient.SendMessage(chatId, string.Format(MessageText.BookingCreatedTemplate, dayOfWeekRu, timeText),
+            cancellationToken: cancellationToken);
     }
 
     private async Task GoBack(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)

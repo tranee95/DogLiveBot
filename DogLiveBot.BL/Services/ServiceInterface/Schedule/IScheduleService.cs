@@ -39,4 +39,12 @@ public interface IScheduleService
     /// <returns>Истина, если резервирование прошло успешно; иначе — ложь.</returns>
     Task<bool> TryReserveSlot(long telegramUserId, BookingPayload bookingPayload,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Получение слота для регистрации по идентификатору. 
+    /// </summary>
+    /// <param name="timeSlotId">Идентификатор слота времени.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <returns>Слот времени <see cref="AvailableTimeDto"/>.</returns>
+    Task<AvailableTimeDto> GetTimeSlotById(int timeSlotId, CancellationToken cancellationToken);
 }

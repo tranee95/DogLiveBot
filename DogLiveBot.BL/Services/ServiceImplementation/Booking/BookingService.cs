@@ -102,7 +102,7 @@ public class BookingService : IBookingService
         }
 
         // День и время выбраны -> проверить слот и обработать выбор собаки
-        if (!payload.IsDayOfWeekDefault() && !payload.IsTimeSlotIdDefault() && payload.IsDogIdDefault())
+        if (!payload.IsDayOfWeekDefault() && !payload.IsTimeSlotIdDefault())
         {
             var timeSlot = await GetTimeSlot(payload.TimeSlotId, cancellationToken);
             if (timeSlot == null)
@@ -127,11 +127,27 @@ public class BookingService : IBookingService
             // Если все заполнено (включая dog), резервируем
             if (!payload.IsDayOfWeekDefault() && !payload.IsTimeSlotIdDefault() && !payload.IsDogIdDefault())
             {
-                return new BookingStepResult { Step = BookingStepEnum.Reserve };
+                return new BookingStepResult(BookingStepEnum.Reserve);
             }
         }
 
         _logger.LogWarning("Incomplete payload for reservation: {@Payload}", payload);
-        return new BookingStepResult { Step = BookingStepEnum.Restart };
+        return new BookingStepResult(BookingStepEnum.Restart);
+    }
+
+    /// <inheritdoc />
+    public async Task<ICollection<BookingNotesDto>> GeUserNotes(long chatId, CancellationToken cancellationToken)
+    {
+        var now = DateTime.Now;
+        return await _readOnlyRepository.GetSelected<Data.Context.Entity.Booking, BookingNotesDto>(
+            filter: s => s.User.TelegramId == chatId && 
+                         (s.Status == BookingStatusEnum.Сonfirmed || s.Status == BookingStatusEnum.Awaiting) &&
+                         s.AvailableSlot.Date > now,
+            selector: s => new BookingNotesDto(
+                s.Id, s.AvailableSlot.DayOfWeek,
+                s.AvailableSlot.StartTime, 
+                s.AvailableSlot.EndTime, 
+                s.AvailableSlot.Date),
+            cancellationToken: cancellationToken);
     }
 }

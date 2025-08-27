@@ -146,6 +146,20 @@ public class ScheduleService : IScheduleService
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<AvailableTimeDto> GetTimeSlotById(int timeSlotId, CancellationToken cancellationToken)
+    {
+        return await _readOnlyRepository.GetFirstOrDefaultSelected<AvailableSlot, AvailableTimeDto>(
+            filter: s => s.Id == timeSlotId,
+            selector: s => new AvailableTimeDto()
+            {
+                TimeSlotId = s.Id,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime
+            },
+            cancellationToken: cancellationToken);
+    }
+
     /// <summary>
     /// Проверяет наличие активного расписания на текущую неделю.
     /// </summary>

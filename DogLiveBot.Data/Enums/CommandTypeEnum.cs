@@ -29,7 +29,7 @@ public enum CommandTypeEnum
 
     [Description("/addDog")]
     AddDog,
-    
+
     [Description("/deleteDog")]
     DeleteDog,
 

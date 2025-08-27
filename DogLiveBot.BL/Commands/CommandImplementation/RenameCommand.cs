@@ -40,7 +40,7 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
     }
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.Rename;
-    public override CommandTypeEnum BackCommandType => CommandTypeEnum.Settings;
+    public override CommandTypeEnum BackCommandType => CommandTypeEnum.MainMenu;
 
     public async Task ExecuteTextCommandLogic(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)

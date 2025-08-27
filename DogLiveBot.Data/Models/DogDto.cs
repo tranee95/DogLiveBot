@@ -2,7 +2,7 @@ using DogLiveBot.Data.Enums;
 
 namespace DogLiveBot.Data.Models;
 
-public class DogDeleteDto
+public class DogDto
 {
     /// <summary>
     /// Идентификатор собаки

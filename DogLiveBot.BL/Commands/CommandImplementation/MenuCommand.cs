@@ -27,7 +27,7 @@ public class MenuCommand : CallbackQueryCommand, ICommand
         _botClient = botClient;
     }
 
-    public override CommandTypeEnum CommandType => CommandTypeEnum.Menu;
+    public override CommandTypeEnum CommandType => CommandTypeEnum.MainMenu;
 
     public override CommandTypeEnum BackCommandType => CommandTypeEnum.Empty;
 

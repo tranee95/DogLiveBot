@@ -59,7 +59,7 @@ public interface IReadOnlyRepository
     /// <summary>
     /// Возвращает коллекцию сущностей, соответствующих указанному условию.
     /// </summary>
-    Task<ICollection<TEntity>> Where<TEntity>(
+    Task<ICollection<TEntity>> Get<TEntity>(
         Expression<Func<TEntity, bool>> filter,
         CancellationToken cancellationToken,
         bool getDeleted = false,

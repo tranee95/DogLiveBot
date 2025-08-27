@@ -3,6 +3,7 @@ using DogLiveBot.BL.Commands.CommandInterface;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Extensions;
+using DogLiveBot.Data.Models.CommandData;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -52,35 +53,63 @@ public abstract class CallbackQueryCommand : ICommand
     public abstract CommandTypeEnum BackCommandType { get; }
 
     /// <summary>
-    /// Выполняет обработку сообщения и обратного вызова.
-    /// Обрабатывает обратный вызов, обновляет информацию о последнем запросе пользователя
-    /// и выполняет специфичную для команды логику.
+    /// Обертка выполнения команды (ICommand): сначала обрабатывает CallbackQuery, затем предметную логику.
     /// </summary>
-    /// <param name="message">Сообщение, полученное от Telegram.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <param name="callbackQuery">Обратный вызов, полученный от Telegram.</param>
     public async Task Execute(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
-        await ExecuteCommandLogic(message, cancellationToken, callbackQuery);
         await HandleCallbackQuery(callbackQuery, cancellationToken);
+        await ExecuteCommandLogic(message, cancellationToken, callbackQuery);
     }
 
     /// <summary>
-    /// Выполняет специфичную для команды логику обработки сообщения.
-    /// Этот метод должен быть реализован в производных классах.
+    /// Обертка выполнения команды, обрабатывающей текст (IReceivedTextCommand).
+    /// Вызывается из конкретной команды в реализации интерфейса.
     /// </summary>
-    /// <param name="message">Сообщение, полученное от Telegram.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <param name="callbackQuery">Обратный вызов, полученный от Telegram.</param>
+    protected async Task ExecuteTextCommand(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
+    {
+        await HandleCallbackQuery(callbackQuery, cancellationToken);
+        await ExecuteTextCommandLogicCore(message, cancellationToken, callbackQuery);
+    }
+
+    /// <summary>
+    /// Обертка выполнения команды, обрабатывающей данные (IReceivedDataCommand).
+    /// Вызывается из конкретной команды в реализации интерфейса.
+    /// </summary>
+    protected async Task ExecuteDataCommand(Message message, CommandData commandData, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
+    {
+        await HandleCallbackQuery(callbackQuery, cancellationToken);
+        await ExecuteDataCommandLogicCore(message, commandData, cancellationToken, callbackQuery);
+    }
+
+    /// <summary>
+    /// Предметная логика для ICommand.
+    /// </summary>
     protected abstract Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery);
+
+    /// <summary>
+    /// Предметная логика для IReceivedTextCommand (переопределяется в командах, которые его поддерживают).
+    /// </summary>
+    protected virtual Task ExecuteTextCommandLogicCore(Message message, CancellationToken cancellationToken,
+        CallbackQuery? callbackQuery = null)
+    {
+        throw new NotSupportedException($"{GetType().Name} does not support text handling");
+    }
+
+    /// <summary>
+    /// Предметная логика для IReceivedDataCommand (переопределяется в командах, которые его поддерживают).
+    /// </summary>
+    protected virtual Task ExecuteDataCommandLogicCore(Message message, CommandData commandData,
+        CancellationToken cancellationToken,
+        CallbackQuery? callbackQuery = null)
+    {
+        throw new NotSupportedException($"{GetType().Name} does not support data handling");
+    }
 
     /// <summary>
     /// Обрабатывает обратный вызов, обновляет информацию о последнем запросе пользователя
     /// и отвечает на обратный вызов в Telegram.
     /// </summary>
-    /// <param name="callbackQuery">Обратный вызов, полученный от Telegram.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
     private async Task HandleCallbackQuery(CallbackQuery? callbackQuery, CancellationToken cancellationToken)
     {
         if (callbackQuery != null)
@@ -94,8 +123,6 @@ public abstract class CallbackQueryCommand : ICommand
     /// Обновляет информацию о последнем запросе пользователя или добавляет новый,
     /// если его ещё нет в базе данных.
     /// </summary>
-    /// <param name="callbackQuery">Обратный вызов, полученный от Telegram.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
     private async Task CreateOrUpdateUserCallbackQuery(CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
         var userLastCallbackQuery = await _readOnlyRepository.GetLast<UserCallbackQuery>(

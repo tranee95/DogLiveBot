@@ -3,6 +3,7 @@ using DogLiveBot.BL.Services.ServiceImplementation.Telegram;
 using DogLiveBot.BL.Services.ServiceInterface.Schedule;
 using DogLiveBot.Data.Context.Entity;
 using DogLiveBot.Data.Models;
+using DogLiveBot.Data.Models.CommandData;
 using DogLiveBot.Data.Models.Options;
 using DogLiveBot.Data.Repository.RepositoryInterfaces;
 using Microsoft.Extensions.Logging;
@@ -91,8 +92,9 @@ public class ScheduleService : IScheduleService
         return slots.OrderBy(s => s.StartTime).ToArray();
     }
 
+    
     /// <inheritdoc/>
-    public async Task<bool> TryReserveSlot(long telegramUserId, DayOfWeek dayOfWeek, TimeSpan startTime,
+    public async Task<bool> TryReserveSlot(long telegramUserId, BookingPayload bookingPayload,
         CancellationToken cancellationToken)
     {
         await using var tr = await _repository.CreateTransaction(cancellationToken);
@@ -112,8 +114,8 @@ public class ScheduleService : IScheduleService
             // Находим точный слот
             var slot = await _readOnlyRepository.GetFirstOrDefault<AvailableSlot>(
                 filter: s => s.ScheduleId == activeSchedule.Id
-                             && s.DayOfWeek == dayOfWeek
-                             && s.StartTime == startTime,
+                             && s.DayOfWeek == (DayOfWeek)bookingPayload.DayOfWeek
+                             && s.Id == bookingPayload.TimeSlotId,
                 cancellationToken: cancellationToken);
 
             if (slot is null || slot.IsReserved)
@@ -124,23 +126,21 @@ public class ScheduleService : IScheduleService
 
             await _repository.BatchUpdate<AvailableSlot>(
                 filter: s => s.ScheduleId == activeSchedule.Id
-                             && s.DayOfWeek == dayOfWeek
-                             && s.StartTime == startTime,
+                             && s.DayOfWeek == (DayOfWeek)bookingPayload.DayOfWeek
+                             && s.Id == bookingPayload.TimeSlotId,
                 updateAction: props => props
                     .SetProperty(s => s.IsReserved, true)
                     .SetProperty(s => s.ModifiedDate, DateTime.UtcNow),
                 cancellationToken: cancellationToken);
 
-            var booking = new Booking(telegramUserId, 1, slot.Id);
+            var booking = new Data.Context.Entity.Booking(telegramUserId, bookingPayload.DogId, slot.Id);
             await _repository.Add(booking, tr, cancellationToken);
 
             await tr.CommitAsync(cancellationToken);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, "TryReserveSlot failed for user {User} {Day} {Time}", telegramUserId, dayOfWeek,
-                startTime);
             await tr.RollbackAsync(cancellationToken);
             return false;
         }

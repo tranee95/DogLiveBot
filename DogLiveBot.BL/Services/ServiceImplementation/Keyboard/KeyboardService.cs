@@ -3,7 +3,6 @@ using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Enums.Extensions;
 using DogLiveBot.Data.Models;
-using DogLiveBot.Data.Models.CommadData;
 using DogLiveBot.Data.Models.CommandData;
 using DogLiveBot.Data.Text;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -93,7 +92,7 @@ public class KeyboardService : IKeyboardService
     }
 
     /// <inheritdoc/>
-    public InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDeleteDto> dogsModel)
+    public InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDto> dogsModel)
     {
         var menu = new List<InlineKeyboardButton[]>();
 
@@ -142,6 +141,25 @@ public class KeyboardService : IKeyboardService
             rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(time.Label, JsonSerializer.Serialize(commandData, _options)),
+            });
+        }
+
+        return new InlineKeyboardMarkup(rows);
+    }
+
+    /// <inheritdoc/>
+    public InlineKeyboardMarkup GetDogs(DayOfWeek dayOfWeek, int timeSlotId, ICollection<DogDto> dogs)
+    {
+        var rows = new List<InlineKeyboardButton[]>();
+
+        foreach (var dog in dogs)
+        {
+            var data = new BookingPayload(dayOfWeek, timeSlotId, dog.Id);
+            var commandData = new CommandData(CommandTypeEnum.CreateBooking, data);
+
+            rows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(dog.Name, JsonSerializer.Serialize(commandData, _options)),
             });
         }
 

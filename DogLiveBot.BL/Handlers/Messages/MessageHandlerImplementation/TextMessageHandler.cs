@@ -44,31 +44,35 @@ public class TextMessageHandler : IMessageHandler
     /// выполняет соответствующую обработку. В противном случае обрабатывает текстовое сообщение.
     /// </summary>
     /// <param name="message">Сообщение, полученное от Telegram.</param>
-    /// <param name="callbackQuery">Запрос на обратный вызов.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
+    /// <param name="callbackQuery">Запрос на обратный вызов.</param>
     public async Task HandleMessage(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
     {
         var text = callbackQuery?.Data ?? message.Text;
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
         var executeMessage = callbackQuery?.Message ?? message;
 
-        if (text != null)
+        _logger.LogInformation($"Received {(callbackQuery == null ? "message" : "callbackQuery")}: {text}");
+
+        if (TryParseJson<CommandData>(text, out var commandData))
+        { 
+            await HandleReceivedData(executeMessage, commandData, cancellationToken, callbackQuery);
+            return;
+        }
+
+        var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(text);
+        if (commandType.HasValue)
         {
-            _logger.LogInformation($"Received {(callbackQuery == null ? "message" : "callbackQuery")}: {text}");
-
-            if (TryParseFromJsonToObject<CommandData>(text, out var commandData))
-            { 
-                await HandleReceivedData(executeMessage, commandData, cancellationToken, callbackQuery);
-            }
-            else
-            {
-                var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(text);
-                var task = commandType.HasValue 
-                    ? HandleExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery) 
-                    : HandleReceivedText(message, cancellationToken);
-
-                await task.WaitAsync(cancellationToken);
-            }
+            await HandleExecuteCommand(commandType.Value, executeMessage, cancellationToken, callbackQuery);
+        }
+        else
+        {
+            await HandleReceivedText(message, cancellationToken);
         }
     }
 
@@ -97,15 +101,24 @@ public class TextMessageHandler : IMessageHandler
     private async Task HandleReceivedText(Message message, CancellationToken cancellationToken)
     {
         var userCallbackQuery = await _readOnlyRepository.GetFirstOrDefault<UserCallbackQuery>(
-           filter: s => s.UserTelegramId == message.Chat.Id,
-           cancellationToken: cancellationToken);
+            filter: s => s.UserTelegramId == message.Chat.Id,
+            cancellationToken: cancellationToken);
         
-        if (userCallbackQuery != null)
+        if (userCallbackQuery == null)
         {
-            var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
-            var receivedTextCommand = _receivedTextCommandFactory.GetCommand(commandType);
-            await receivedTextCommand.ExecuteReceivedTextLogic(message, cancellationToken);
+            _logger.LogWarning($"No UserCallbackQuery found for user {message.Chat.Id}. Skipping received text handling.");
+            return;
         }
+
+        var commandType = CommandTypeEnumHelper.GetCommandTypeEnum(userCallbackQuery.Data);
+        if (!commandType.HasValue)
+        {
+            _logger.LogWarning($"Invalid command type from UserCallbackQuery data: {userCallbackQuery.Data}. Skipping.");
+            return;
+        }
+
+        var receivedTextCommand = _receivedTextCommandFactory.GetCommand(commandType.Value);
+        await receivedTextCommand.ExecuteTextCommandLogic(message, cancellationToken);
     }
 
     /// <summary>
@@ -130,16 +143,16 @@ public class TextMessageHandler : IMessageHandler
     /// <param name="json">JSON-строка для десериализации.</param>
     /// <param name="result">Результат десериализации, если она прошла успешно.</param>
     /// <returns>True, если десериализация прошла успешно, иначе False.</returns>
-    private static bool TryParseFromJsonToObject<T>(string json, out T result)
+    private static bool TryParseJson<T>(string json, out T? result) where T : class
     {
         try
         {
             result = JsonSerializer.Deserialize<T>(json);
             return result != null;
         }
-        catch
+        catch (JsonException ex)
         {
-            result = default;
+            result = null;
             return false;
         }
     }

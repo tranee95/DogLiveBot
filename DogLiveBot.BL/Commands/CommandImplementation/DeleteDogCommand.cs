@@ -50,9 +50,9 @@ public class DeleteDogCommand : CallbackQueryCommand, ICommand, IReceivedDataCom
 
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {
-        var dogs = await _readOnlyRepository.GetSelected<Dog, DogDeleteDto>(
+        var dogs = await _readOnlyRepository.GetSelected<Dog, DogDto>(
             filter: s => s.UserTelegramId == message.Chat.Id,
-            selector: s => new DogDeleteDto()
+            selector: s => new DogDto()
             {
                 Id = s.Id,
                 Name = s.Name

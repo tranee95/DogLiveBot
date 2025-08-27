@@ -1,4 +1,5 @@
 using DogLiveBot.Data.Models;
+using DogLiveBot.Data.Models.CommandData;
 
 namespace DogLiveBot.BL.Services.ServiceInterface.Schedule;
 
@@ -33,10 +34,9 @@ public interface IScheduleService
     /// Пытается зарезервировать временной интервал для указанного пользователя Telegram.
     /// </summary>
     /// <param name="telegramUserId">Идентификатор пользователя Telegram.</param>
-    /// <param name="dayOfWeek">День недели, в который нужно зарезервировать время.</param>
-    /// <param name="startTime">Время начала резервирования.</param>
+    /// <param name="bookingPayload">Данные записи.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>Истина, если резервирование прошло успешно; иначе — ложь.</returns>
-    Task<bool> TryReserveSlot(long telegramUserId, DayOfWeek dayOfWeek, TimeSpan startTime,
+    Task<bool> TryReserveSlot(long telegramUserId, BookingPayload bookingPayload,
         CancellationToken cancellationToken);
 }

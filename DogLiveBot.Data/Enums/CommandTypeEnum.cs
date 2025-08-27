@@ -40,5 +40,5 @@ public enum CommandTypeEnum
     Back,
 
     [Description("/menu")]
-    Menu
+    MainMenu
 }

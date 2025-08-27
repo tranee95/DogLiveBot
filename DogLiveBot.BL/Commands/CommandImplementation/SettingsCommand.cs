@@ -38,7 +38,7 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.Settings;
 
-    public override CommandTypeEnum BackCommandType => CommandTypeEnum.Menu;
+    public override CommandTypeEnum BackCommandType => CommandTypeEnum.MainMenu;
 
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery)
     {

@@ -1,6 +1,5 @@
 using AutoMapper;
 using DogLiveBot.BL.Commands.CommandInterface;
-using DogLiveBot.BL.Services.ServiceInterface;
 using DogLiveBot.BL.Services.ServiceInterface.Cache;
 using DogLiveBot.BL.Services.ServiceInterface.Command;
 using DogLiveBot.Data.Enums;
@@ -21,15 +20,15 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
     private readonly IReadOnlyRepository _readOnlyRepository;
     private readonly ICommandService _commandService;
     private readonly ICacheService _cacheService;
-    
+
     public RenameCommand(
-        IMapper mapper, 
-        ILogger<RenameCommand> logger, 
-        ITelegramBotClient botClient, 
+        IMapper mapper,
+        ILogger<RenameCommand> logger,
+        ITelegramBotClient botClient,
         IReadOnlyRepository readOnlyRepository,
         IRepository repository,
-        ICommandService commandService, 
-        ICacheService cacheService) 
+        ICommandService commandService,
+        ICacheService cacheService)
         : base(mapper, botClient, repository, readOnlyRepository)
     {
         _logger = logger;
@@ -43,7 +42,19 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
     public override CommandTypeEnum CommandType => CommandTypeEnum.Rename;
     public override CommandTypeEnum BackCommandType => CommandTypeEnum.Settings;
 
-    public async Task ExecuteReceivedTextLogic(Message message, CancellationToken cancellationToken,
+    public async Task ExecuteTextCommandLogic(Message message, CancellationToken cancellationToken,
+        CallbackQuery? callbackQuery = null)
+    {
+        await ExecuteTextCommand(message, cancellationToken, callbackQuery);
+    }
+
+    protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,
+        CallbackQuery? callbackQuery)
+    {
+        await _botClient.SendMessage(message.Chat.Id, MessageText.SetUserName, cancellationToken: cancellationToken);
+    }
+
+    protected override async Task ExecuteTextCommandLogicCore(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
     {
         try
@@ -51,9 +62,9 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
             if (!string.IsNullOrWhiteSpace(message.Text))
             {
                 var user = await _readOnlyRepository.GetFirstOrDefault<User>(
-                    filter: s => s.TelegramId == message.Chat.Id, 
+                    filter: s => s.TelegramId == message.Chat.Id,
                     cancellationToken: cancellationToken);
-                
+
                 if (user != null)
                 {
                     user.FirstName = message.Text.Trim();
@@ -83,16 +94,11 @@ public class RenameCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         }
     }
 
-    protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery)
-    {
-        await _botClient.SendMessage(message.Chat.Id, MessageText.SetUserName, cancellationToken: cancellationToken);
-    }
-    
     private async Task SendMessage(Message message, string messageText, CancellationToken cancellationToken)
     {
         await _botClient.SendMessage(message.Chat.Id, messageText, cancellationToken: cancellationToken);
     }
-    
+
     private async Task GoBack(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
         await _commandService.ExecuteGoBackCommand(message, cancellationToken, callbackQuery);

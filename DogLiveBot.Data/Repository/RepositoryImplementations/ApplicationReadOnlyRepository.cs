@@ -64,7 +64,7 @@ public class ApplicationReadOnlyRepository : IReadOnlyRepository
     
 
     /// <inheritdoc/>
-    public async Task<ICollection<TEntity>> Where<TEntity>(
+    public async Task<ICollection<TEntity>> Get<TEntity>(
         Expression<Func<TEntity, bool>> filter, 
         CancellationToken cancellationToken,
         bool getDeleted = false,

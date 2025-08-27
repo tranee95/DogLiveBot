@@ -29,9 +29,9 @@ public interface IKeyboardService
     /// <summary>
     /// Получает клавиатуру для удаления собак на основе предоставленных моделей.
     /// </summary>
-    /// <param name="models">Коллекция объектов <see cref="DogDeleteDto"/>, представляющих собак для удаления.</param>
+    /// <param name="models">Коллекция объектов <see cref="DogDto"/>, представляющих собак для удаления.</param>
     /// <returns>Объект <see cref="InlineKeyboardMarkup"/>, представляющий клавиатуру для удаления собак.</returns>
-    InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDeleteDto> models);
+    InlineKeyboardMarkup GetDeleteDogs(ICollection<DogDto> models);
 
     /// <summary>
     /// Получает клавиатуру для выбора дней.
@@ -47,4 +47,6 @@ public interface IKeyboardService
     /// <param name="times">Коллекция объектов <see cref="AvailableTimeDto"/>, представляющих доступное время.</param>
     /// <returns>Объект <see cref="InlineKeyboardMarkup"/>, представляющий клавиатуру для выбора времени.</returns>
     InlineKeyboardMarkup GetTimes(DayOfWeek dayOfWeek, ICollection<AvailableTimeDto> times);
+
+    InlineKeyboardMarkup GetDogs(DayOfWeek dayOfWeek, int timeSlotId, ICollection<DogDto> dogs);
 }

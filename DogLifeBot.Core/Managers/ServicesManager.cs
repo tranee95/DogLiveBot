@@ -8,6 +8,7 @@ using DogLiveBot.BL.Handlers.Messages.MessageHandlerImplementation;
 using DogLiveBot.BL.Handlers.Messages.MessageHandlerInterface;
 using DogLiveBot.BL.Jobs;
 using DogLiveBot.BL.Services.ServiceImplementation;
+using DogLiveBot.BL.Services.ServiceImplementation.Booking;
 using DogLiveBot.BL.Services.ServiceImplementation.Cache;
 using DogLiveBot.BL.Services.ServiceImplementation.Command;
 using DogLiveBot.BL.Services.ServiceImplementation.Keyboard;
@@ -15,6 +16,7 @@ using DogLiveBot.BL.Services.ServiceImplementation.Schedule;
 using DogLiveBot.BL.Services.ServiceImplementation.Telegram;
 using DogLiveBot.BL.Services.ServiceImplementation.User;
 using DogLiveBot.BL.Services.ServiceInterface;
+using DogLiveBot.BL.Services.ServiceInterface.Booking;
 using DogLiveBot.BL.Services.ServiceInterface.Cache;
 using DogLiveBot.BL.Services.ServiceInterface.Command;
 using DogLiveBot.BL.Services.ServiceInterface.Keyboard;
@@ -154,6 +156,7 @@ public static class ServicesManager
         services.AddScoped<IKeyboardService, KeyboardService>();
         services.AddScoped<ICommandService, CommandService>();
         services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<IBookingService, BookingService>();
 
         services.AddScoped<IMessageHandlerFactory, MessageHandlerFactory>();
 

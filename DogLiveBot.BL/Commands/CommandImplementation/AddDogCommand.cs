@@ -40,10 +40,21 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
 
     public override CommandTypeEnum CommandType => CommandTypeEnum.AddDog;
 
-    public override CommandTypeEnum BackCommandType => CommandTypeEnum.Settings;
+    public override CommandTypeEnum BackCommandType => CommandTypeEnum.MainMenu;
 
-    public async Task ExecuteReceivedTextLogic(Message message, CancellationToken cancellationToken,
+    public async Task ExecuteTextCommandLogic(Message message, CancellationToken cancellationToken,
         CallbackQuery? callbackQuery = null)
+    {
+        await ExecuteTextCommand(message, cancellationToken, callbackQuery);
+    }
+
+    protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,
+        CallbackQuery? callbackQuery)
+    {
+        await _botClient.SendMessage(message.Chat.Id, MessageText.SpecifyDogName, cancellationToken: cancellationToken);
+    }
+
+    protected override async Task ExecuteTextCommandLogicCore(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
         try
         {
@@ -69,12 +80,6 @@ public class AddDogCommand : CallbackQueryCommand, ICommand, IReceivedTextComman
         {
             await GoBack(message, cancellationToken);
         }
-    }
-
-    protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken,
-        CallbackQuery? callbackQuery)
-    {
-        await _botClient.SendMessage(message.Chat.Id, MessageText.SpecifyDogName, cancellationToken: cancellationToken);
     }
     
     private async Task SendMessage(Message message, string messageText, CancellationToken cancellationToken)

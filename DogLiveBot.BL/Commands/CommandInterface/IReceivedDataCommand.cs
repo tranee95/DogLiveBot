@@ -1,6 +1,5 @@
 using DogLiveBot.Data.Enums;
 using DogLiveBot.Data.Models;
-using DogLiveBot.Data.Models.CommadData;
 using DogLiveBot.Data.Models.CommandData;
 using Telegram.Bot.Types;
 

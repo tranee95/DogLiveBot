@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogLive.Shared.Messages", "DogLive.Shared.Messages\DogLive.Shared.Messages.csproj", "{BE7F3B24-8DF9-4415-8B9D-EE08B722AF9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogLive.Shared.Repository", "DogLive.Shared.Repository\DogLive.Shared.Repository.csproj", "{2A741841-C2CA-42D5-BFDE-096600724D2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE7F3B24-8DF9-4415-8B9D-EE08B722AF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE7F3B24-8DF9-4415-8B9D-EE08B722AF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE7F3B24-8DF9-4415-8B9D-EE08B722AF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE7F3B24-8DF9-4415-8B9D-EE08B722AF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A741841-C2CA-42D5-BFDE-096600724D2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A741841-C2CA-42D5-BFDE-096600724D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A741841-C2CA-42D5-BFDE-096600724D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A741841-C2CA-42D5-BFDE-096600724D2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

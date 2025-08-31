@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogLive.Scheduler.Core", "DogLive.Scheduler.Core\DogLive.Scheduler.Core.csproj", "{C958C0BB-B9F4-4481-99A5-1FFE52310D30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogLive.Scheduler.BL", "DogLive.Scheduler.BL\DogLive.Scheduler.BL.csproj", "{0F9EEACB-D80A-4ED0-81FB-5C7C8740571C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogLive.Scheduler.Data", "DogLive.Scheduler.Data\DogLive.Scheduler.Data.csproj", "{C73F996E-50C2-4041-8C59-FB17FB95B8CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C958C0BB-B9F4-4481-99A5-1FFE52310D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C958C0BB-B9F4-4481-99A5-1FFE52310D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C958C0BB-B9F4-4481-99A5-1FFE52310D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C958C0BB-B9F4-4481-99A5-1FFE52310D30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F9EEACB-D80A-4ED0-81FB-5C7C8740571C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F9EEACB-D80A-4ED0-81FB-5C7C8740571C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F9EEACB-D80A-4ED0-81FB-5C7C8740571C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F9EEACB-D80A-4ED0-81FB-5C7C8740571C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C73F996E-50C2-4041-8C59-FB17FB95B8CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C73F996E-50C2-4041-8C59-FB17FB95B8CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C73F996E-50C2-4041-8C59-FB17FB95B8CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C73F996E-50C2-4041-8C59-FB17FB95B8CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

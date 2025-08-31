@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="14.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+        <PackageReference Include="NLog" Version="6.0.3" />
+        <PackageReference Include="NLog.Extensions.Logging" Version="6.0.3" />
+        <PackageReference Include="NLog.Web.AspNetCore" Version="6.0.3" />
+        <PackageReference Include="Quartz" Version="3.14.0" />
+        <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.14.0" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Update="appsettings.Development.json">
+        <DependentUpon>appsettings.json</DependentUpon>
+      </None>
+      <None Update="appsettings.Production.json">
+        <DependentUpon>appsettings.json</DependentUpon>
+      </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\DogLive.Scheduler.BL\DogLive.Scheduler.BL.csproj" />
+      <ProjectReference Include="..\DogLive.Scheduler.Data\DogLive.Scheduler.Data.csproj" />
+    </ItemGroup>
+
+</Project>

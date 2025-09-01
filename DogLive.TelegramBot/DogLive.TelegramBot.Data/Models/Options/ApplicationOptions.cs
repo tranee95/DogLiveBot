@@ -14,20 +14,15 @@ namespace DogLive.TelegramBot.Data.Models.Options
         /// Настройки подключения к базе данных приложения.
         /// </summary>
         public ApplicationDbConnection ApplicationDbConnection { get; set; }
-    
+
         /// <summary>
         /// Настройки подключения redis
         /// </summary>
         public RedisSettings RedisSettings { get; set; }
-    
+
         /// <summary>
-        /// Конфигурация крон выражений.
+        /// Настройка подключения к RabbitMQ
         /// </summary>
-        public CronExpressionSettings CronExpressionSettings { get; set; }  
-    
-        /// <summary>
-        /// Настройки формирования слотов расписания
-        /// </summary>
-        public AvailableSlotSettings AvailableSlotSettings { get; set; }
+        public RabbitMqSettings RabbitMqSettings { get; set; }
     }
 }

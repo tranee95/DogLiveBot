@@ -3,9 +3,7 @@ using DogLive.TelegramBot.BL.Services.ServiceInterface.Schedule;
 using DogLive.TelegramBot.Data.Context.Entity;
 using DogLive.TelegramBot.Data.Models;
 using DogLive.TelegramBot.Data.Models.CommandData;
-using DogLive.TelegramBot.Data.Models.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Shared.Messages.Repository.Repository.RepositoryInterfaces;
 
 namespace DogLive.TelegramBot.BL.Services.ServiceImplementation.Schedule;
@@ -16,31 +14,28 @@ namespace DogLive.TelegramBot.BL.Services.ServiceImplementation.Schedule;
 public class ScheduleService : IScheduleService
 {
     private readonly ILogger<ScheduleService> _logger;
-    private readonly IOptions<ApplicationOptions> _options;
     private readonly IRepository _repository;
     private readonly IReadOnlyRepository _readOnlyRepository;
 
     public ScheduleService(
         ILogger<ScheduleService> logger,
-        IOptions<ApplicationOptions> options, 
         IRepository repository, 
         IReadOnlyRepository readOnlyRepository)
     {
         _logger = logger;
-        _options = options;
         _repository = repository;
         _readOnlyRepository = readOnlyRepository;
     }
 
     /// <inheritdoc/>
-    public async Task FillCalendar(CancellationToken cancellationToken)
+    public async Task FillCalendar(AvailableSlot[] availableSlots, CancellationToken cancellationToken)
     {
         if (await HasActiveSchedule(cancellationToken))
         {
             return;
         }
 
-        await CreateNewSchedule(cancellationToken);
+        await CreateNewSchedule(availableSlots, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -177,7 +172,7 @@ public class ScheduleService : IScheduleService
     /// Создает новое расписание и генерирует доступные временные слоты.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    private async Task CreateNewSchedule(CancellationToken cancellationToken)
+    private async Task CreateNewSchedule(AvailableSlot[] availableSlots, CancellationToken cancellationToken)
     {
         await using var tr = await _repository.CreateTransaction(cancellationToken);
 
@@ -188,8 +183,12 @@ public class ScheduleService : IScheduleService
             var schedule = new Data.Context.Entity.Schedule(GetStartOfWeek(DateTime.Today), GetEndOfWeek(DateTime.Today), true);
             await _repository.Add(schedule, tr, cancellationToken);
 
-            var availableSlot = CreateAvailableSlot(schedule.Id);
-            await _repository.AddRange(availableSlot, tr, cancellationToken);
+            foreach (var slot in availableSlots)
+            {
+                slot.ScheduleId = schedule.Id;
+            }
+
+            await _repository.AddRange<AvailableSlot>(availableSlots, tr, cancellationToken);
 
             await tr.CommitAsync(cancellationToken);
         }
@@ -200,38 +199,6 @@ public class ScheduleService : IScheduleService
         }
     }
 
-    /// <summary>
-    /// Генерирует доступные временные интервалы для указанного дня недели.
-    /// </summary>
-    /// <param name="scheduleId">Идентификатор расписания.</param>
-    /// <param name="dayOfWeek">День недели.</param>
-    /// <param name="startTime">Начальное время.</param>
-    /// <param name="endTime">Конечное время.</param>
-    /// <param name="interval">Интервал между слотами.</param>
-    /// <returns>Список доступных временных интервалов.</returns>
-    private IEnumerable<AvailableSlot> GenerateAvailableSlots(
-        int scheduleId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime, TimeSpan interval)
-    {
-        for (var time = startTime; time < endTime; time = time.Add(interval))
-        {
-            yield return new AvailableSlot(scheduleId, dayOfWeek, time, interval);;
-        }
-    }
-
-    /// <summary>
-    /// Создает массив доступных слотов на основе идентификатора расписания и настроек доступных слотов.
-    /// </summary>
-    /// <param name="scheduleId">Идентификатор расписания, для которого создаются слоты.</param>
-    /// <returns>Массив доступных слотов.</returns>
-    private AvailableSlot[] CreateAvailableSlot(int scheduleId)
-    {
-        var settings = _options.Value.AvailableSlotSettings;
-        return Enum.GetValues<DayOfWeek>()
-            .SelectMany(dayOfWeek =>
-                GenerateAvailableSlots(scheduleId, dayOfWeek, settings.GetStartTimeSpan,
-                    settings.GetEndTimeSpan, settings.GetIntervalSpan))
-            .ToArray();
-    }
 
     /// <summary>
     /// Отключает активные расписания, устанавливая их свойство IsActiveWeek в false.

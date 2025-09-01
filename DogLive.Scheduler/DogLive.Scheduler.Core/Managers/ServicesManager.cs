@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Quartz;
+using Shared.Messages.Messages.Extensions;
 
 namespace DogLive.Scheduler.Core.Managers;
 
@@ -21,11 +22,25 @@ public static class ServicesManager
     {
         builder.ConfigureServices((context, services) =>
         {
+            RegisterOptions(services, context);
             RegisterServices(services);
             RegisterJobs(services);
+            RegisterMassTransit(services);
         });
     }
 
+    /// <summary>
+    /// Регистрирует параметры приложения в контейнере зависимостей.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    /// <param name="context">Контекст хоста, содержащий конфигурацию приложения.</param>
+    private static void RegisterOptions(IServiceCollection services, HostBuilderContext context)
+    {
+        services.AddOptions<ApplicationOptions>()
+            .Bind(context.Configuration.GetSection(nameof(ApplicationOptions)))
+            .ValidateDataAnnotations();
+    }
+    
     /// <summary>
     /// Метод для регистрации заданий (Jobs) с использованием Quartz в контейнере службы.
     /// Извлекает настройки приложения из конфигурации, включая крон-выражения,
@@ -35,7 +50,6 @@ public static class ServicesManager
     private static void RegisterJobs(IServiceCollection services)
     {
         var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
-        
         services.AddQuartz(q =>
         {
             AddJob<FillingCalendarDataJob>(q, new JobConfiguration(nameof(settings.CronExpressionSettings), 
@@ -70,5 +84,15 @@ public static class ServicesManager
     {
         services.AddAutoMapperProfiles();
         services.AddScoped<IScheduleService, ScheduleService>();
+    }
+
+    /// <summary>
+    /// Регистрация massTransit.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterMassTransit(IServiceCollection services)
+    {
+        var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
+        services.RegisterMassTransit(settings.RabbitMqSettings.ConnectionString);
     }
 }

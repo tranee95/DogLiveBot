@@ -5,7 +5,6 @@ using DogLive.TelegramBot.BL.Services.ServiceInterface.Keyboard;
 using DogLive.TelegramBot.Data.Enums;
 using DogLive.TelegramBot.Data.Models;
 using DogLive.TelegramBot.Data.Text;
-using Quartz.Util;
 using Shared.Messages.Repository.Repository.RepositoryInterfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -52,7 +51,7 @@ public class SettingsCommand : CallbackQueryCommand, ICommand
         var cacheKey = $"settings:{message.Chat.Id}";
         var cacheValue = await _cacheService.Get(cacheKey, cancellationToken);
 
-        if (!cacheValue.IsNullOrWhiteSpace())
+        if (!string.IsNullOrWhiteSpace(cacheValue))
         {
             return cacheValue;
         }

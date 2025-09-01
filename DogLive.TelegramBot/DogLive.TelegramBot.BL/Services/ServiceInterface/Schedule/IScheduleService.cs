@@ -1,3 +1,4 @@
+using DogLive.TelegramBot.Data.Context.Entity;
 using DogLive.TelegramBot.Data.Models;
 using DogLive.TelegramBot.Data.Models.CommandData;
 
@@ -13,7 +14,7 @@ public interface IScheduleService
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    Task FillCalendar(CancellationToken cancellationToken);
+    Task FillCalendar(AvailableSlot[] availableSlots, CancellationToken cancellationToken);
 
     /// <summary>
     /// Получает доступные дни недели для записи.

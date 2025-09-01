@@ -9,6 +9,7 @@
     
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="14.0.0" />
+        <PackageReference Include="DogLive.Shared.Messages" Version="1.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
@@ -24,9 +25,14 @@
     <ItemGroup>
       <None Update="appsettings.Development.json">
         <DependentUpon>appsettings.json</DependentUpon>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="appsettings.Production.json">
         <DependentUpon>appsettings.json</DependentUpon>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
     

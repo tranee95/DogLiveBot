@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="DogLive.Shared.Messages" Version="1.0.10" />
       <PackageReference Include="Quartz" Version="3.14.0" />
     </ItemGroup>
 

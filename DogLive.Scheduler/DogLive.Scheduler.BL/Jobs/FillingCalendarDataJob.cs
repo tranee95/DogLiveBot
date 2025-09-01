@@ -27,7 +27,7 @@ public class FillingCalendarDataJob : IJob
             using (var cts = new CancellationTokenSource())
             {
                 _logger.LogInformation("Start filling calendar data job");
-                await _scheduleService.FillCalendar(cts.Token);
+                await _scheduleService.CreateAndSendAvalableSlot(cts.Token);
             }
         }
         catch (Exception ex)

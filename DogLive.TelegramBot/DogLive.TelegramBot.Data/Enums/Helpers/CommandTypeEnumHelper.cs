@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using System.Reflection;
-using Newtonsoft.Json;
-using JsonException = System.Text.Json.JsonException;
 
 namespace DogLive.TelegramBot.Data.Enums.Helpers;
 

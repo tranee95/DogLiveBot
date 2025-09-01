@@ -1,10 +1,9 @@
-namespace DogLive.Scheduler.Data.Models.Options
+namespace DogLive.Scheduler.Data.Models.Options;
+
+/// <summary>
+/// Конфигурация крон выражений.
+/// </summary>
+public class CronExpressionSettings
 {
-    /// <summary>
-    /// Конфигурация крон выражений.
-    /// </summary>
-    public class CronExpressionSettings
-    {
-        public string StartFillingCalendarData { get; set; }
-    }
+    public string StartFillingCalendarData { get; set; }
 }

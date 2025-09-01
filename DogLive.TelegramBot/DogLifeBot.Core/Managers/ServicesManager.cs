@@ -3,10 +3,12 @@ using DogLive.TelegramBot.BL.Commands.CommandImplementation;
 using DogLive.TelegramBot.BL.Commands.CommandInterface;
 using DogLive.TelegramBot.BL.Commands.ReceivedDataCommandFactory;
 using DogLive.TelegramBot.BL.Commands.ReceivedTextCommandFactory;
+using DogLive.TelegramBot.BL.Handlers.MassTransitMessages.Consumers;
+using DogLive.TelegramBot.BL.Handlers.MassTransitMessages.MassTransitMessageHandlerImplementation;
+using DogLive.TelegramBot.BL.Handlers.MassTransitMessages.MassTransitMessageHandlerInterface;
 using DogLive.TelegramBot.BL.Handlers.Messages.MessageHandlerFactory;
 using DogLive.TelegramBot.BL.Handlers.Messages.MessageHandlerImplementation;
 using DogLive.TelegramBot.BL.Handlers.Messages.MessageHandlerInterface;
-using DogLive.TelegramBot.BL.Jobs;
 using DogLive.TelegramBot.BL.Services.ServiceImplementation.Booking;
 using DogLive.TelegramBot.BL.Services.ServiceImplementation.Cache;
 using DogLive.TelegramBot.BL.Services.ServiceImplementation.Command;
@@ -24,12 +26,14 @@ using DogLive.TelegramBot.BL.Services.ServiceInterface.User;
 using DogLive.TelegramBot.Core.Managers.Extensions;
 using DogLive.TelegramBot.Data.Context;
 using DogLive.TelegramBot.Data.Models.Options;
-using DogLive.TelegramBot.Data.Models.Quartz;
+using MassTransit;
+using MassTransit.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Quartz;
-using Shared.Messages.Repository.Repository;
+using Shared.Messages.Messages.Extensions;
+using Shared.Messages.Messages.Schedule.Model;
+using Shared.Messages.Repository.Extensions;
 using Telegram.Bot;
 
 namespace DogLive.TelegramBot.Core.Managers;
@@ -50,7 +54,7 @@ public static class ServicesManager
             RegisterRedis(services);
             RegisterServices(services);
             RegisterCommands(services);
-            RegisterJobs(services);
+            RegisterMassTransit(services);
         });
     }
 
@@ -79,8 +83,8 @@ public static class ServicesManager
         {
             throw new ArgumentException("Connection string is not configured.", nameof(settings.ApplicationDbConnection.ConnectionString));
         }
-        
-        DbContextInjection.Register<TelegramBotDbContext>(services, settings.ApplicationDbConnection.ConnectionString);
+
+        services.RegisterApplicationDbContext<TelegramBotDbContext>(settings.ApplicationDbConnection.ConnectionString);
     }
 
     /// <summary>
@@ -108,39 +112,17 @@ public static class ServicesManager
     }
 
     /// <summary>
-    /// Метод для регистрации заданий (Jobs) с использованием Quartz в контейнере службы.
-    /// Извлекает настройки приложения из конфигурации, включая крон-выражения,
-    /// и добавляет задание <see cref="FillingCalendarDataJob"/> с заданной конфигурацией.
+    /// Регистрация massTransit.
     /// </summary>
-    /// <param name="services">Коллекция сервисов для внедрения зависимостей.</param>
-    private static void RegisterJobs(IServiceCollection services)
+    /// <param name="services">Коллекция сервисов для регистрации.</param>
+    private static void RegisterMassTransit(IServiceCollection services)
     {
         var settings = services.BuildServiceProvider().GetRequiredService<IOptions<ApplicationOptions>>().Value;
         
-        services.AddQuartz(q =>
-        {
-            AddJob<FillingCalendarDataJob>(q, new JobConfiguration(nameof(settings.CronExpressionSettings), 
-                settings.CronExpressionSettings.StartFillingCalendarData));
-        });
+        services.RegisterMassTransit(settings.RabbitMqSettings.ConnectionString);
+        services.RegisterConsumer<ScheduleConsumer>();
 
-        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-    }
-
-    /// <summary>
-    /// Добавление задачи на исполнение
-    /// </summary>
-    /// <param name="configurator">Конфигуратор</param>
-    /// <param name="jobConfiguration">Конфигурация задачи</param>
-    /// <typeparam name="T">Задача</typeparam>
-    private static void AddJob<T>(IServiceCollectionQuartzConfigurator configurator,
-        JobConfiguration jobConfiguration) where T : IJob
-    {
-        configurator.AddJob<T>(options => options.WithIdentity(jobConfiguration.JobKeyName));
-        configurator.AddTrigger(options => options
-            .ForJob(jobConfiguration.Key)
-            .WithIdentity(jobConfiguration.TriggerName)
-            .WithCronSchedule(jobConfiguration.CronExpression)
-        );
+        services.AddScoped<IMassTransitMessageHandler<IRMQScheduleSlot>, ScheduleHandler>();
     }
 
     /// <summary>

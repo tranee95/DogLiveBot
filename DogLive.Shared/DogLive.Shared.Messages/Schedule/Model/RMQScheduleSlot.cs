@@ -3,23 +3,18 @@ using System.Collections.Generic;
 
 namespace Shared.Messages.Messages.Schedule.Model;
 
-public class RMQAvailableSlot
+public interface IRMQScheduleSlot
 {
-    public RMQAvailableSlot(ICollection<AvailableSlotDto> availableSlots)
-    {
-        AvailableSlots = availableSlots;
-    }
-
-    public ICollection<AvailableSlotDto> AvailableSlots { get; private set; }
+    ICollection<ScheduleSlot> ScheduleSlot { get; set; }
 }
 
-public class AvailableSlotDto
+public class ScheduleSlot
 {
-    public AvailableSlotDto()
+    public ScheduleSlot()
     {
     }
 
-    public AvailableSlotDto(DayOfWeek dayOfWeek, TimeSpan time, TimeSpan interval,
+    public ScheduleSlot(DayOfWeek dayOfWeek, TimeSpan time, TimeSpan interval,
         bool isReserved = false)
     {
         DayOfWeek = dayOfWeek;

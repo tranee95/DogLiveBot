@@ -10,5 +10,5 @@ public interface IScheduleService
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    Task FillCalendar(CancellationToken cancellationToken);
+    Task CreateAndSendAvalableSlot(CancellationToken cancellationToken);
 }

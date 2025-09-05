@@ -32,8 +32,11 @@ public class MyNotesCommand : CallbackQueryCommand, ICommand
     protected override async Task ExecuteCommandLogic(Message message, CancellationToken cancellationToken, CallbackQuery? callbackQuery = null)
     {
         var notes = await _bookingService.GeUserNotes(message.Chat.Id, cancellationToken);
-        var text = string.Join(Environment.NewLine, notes.OrderBy(s => s.Date).ThenBy(s => s.Hour).Select(x => x.Text));
 
-        await _botClient.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken);
+        if (notes.Any())
+        {
+            var text = string.Join(Environment.NewLine, notes.OrderBy(s => s.Date).ThenBy(s => s.Hour).Select(x => x.Text));
+            await _botClient.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken);
+        }
     }
 }

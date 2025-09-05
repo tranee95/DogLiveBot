@@ -54,11 +54,13 @@ public class BookingService : IBookingService
     {
         var dogs = await _readOnlyRepository.GetFirstOrDefaultSelected<Data.Context.Entity.User, ICollection<DogDto>>(
             filter: s => s.TelegramId == telegramUserId,
-            selector: s => (s.Dogs.Select(t => new DogDto
-            {
-                Id = t.Id, 
-                Name = t.Name
-            })).ToArray(),
+            selector: s => s.Dogs
+                .Where(t => t.DeleteDate == null)
+                .Select(t => new DogDto
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToArray(),
             cancellationToken: cancellationToken);
 
         if (dogs == null || !dogs.Any())
@@ -142,7 +144,8 @@ public class BookingService : IBookingService
         return await _readOnlyRepository.GetSelected<Data.Context.Entity.Booking, BookingNotesDto>(
             filter: s => s.User.TelegramId == chatId && 
                          (s.Status == BookingStatusEnum.Сonfirmed || s.Status == BookingStatusEnum.Awaiting) &&
-                         s.AvailableSlot.Date > now,
+                         s.AvailableSlot.Date > now &&
+                         s.DeleteDate == null,
             selector: s => new BookingNotesDto(
                 s.Id, s.AvailableSlot.DayOfWeek,
                 s.AvailableSlot.StartTime, 
